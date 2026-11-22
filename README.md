@@ -1,4 +1,4 @@
-﻿# Laptop Selection DSS — SIR service
+# Laptop Selection DSS — SIR service
 
 Сервис поддержки принятия решений для выбора ноутбука методом SIR
 (Superiority and Inferiority Ranking) по семи критериям, с объяснением каждого
@@ -78,6 +78,12 @@ page displays it, so the UI never implies live data it does not have.
 requests from here — DNS answers `401`, M.Video `403`, Citilink fails certificate
 validation — and scraping them would breach their terms. Point the service at an API or
 feed you are allowed to read; CSV is the offline fallback.
+
+## Deploy
+
+Vercel hosts the Next.js UI; the FastAPI service runs on a long-lived host (Render) with
+managed PostgreSQL (Neon). Environment variables, steps, and pitfalls:
+[docs/deploy.md](docs/deploy.md).
 
 ## Verify
 
