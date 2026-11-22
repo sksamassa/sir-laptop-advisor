@@ -223,9 +223,14 @@ def cheapest_active_price() -> int | None:
     return int(row["price"])
 
 
-def seed(models: list[dict[str, Any]]) -> int:
-    """Insert seed models idempotently by (brand, model_name)."""
+def seed(models: list[dict[str, Any]]) -> dict[str, int]:
+    """Upsert seed models idempotently by (brand, model_name).
+
+    ``xmax = 0`` is PostgreSQL's marker for a freshly inserted row, so the caller can
+    tell "created" from "refreshed" instead of counting every upsert as an insert.
+    """
     inserted = 0
+    updated = 0
     with db.connection() as conn, conn.cursor() as cur:
         for item in models:
             cur.execute(
@@ -238,7 +243,8 @@ def seed(models: list[dict[str, Any]]) -> int:
                 "cpu_score = EXCLUDED.cpu_score, ram_gb = EXCLUDED.ram_gb, "
                 "weight_g = EXCLUDED.weight_g, battery_minutes = EXCLUDED.battery_minutes, "
                 "screen_score = EXCLUDED.screen_score, warranty_months = EXCLUDED.warranty_months, "
-                "source = 'seed', fetched_at = now(), updated_at = now()",
+                "source = 'seed', fetched_at = now(), updated_at = now() "
+                "RETURNING (xmax = 0) AS inserted",
                 (
                     uuid.uuid4(),
                     item["brand"],
@@ -255,8 +261,12 @@ def seed(models: list[dict[str, Any]]) -> int:
                     item["warranty_months"],
                 ),
             )
-            inserted += cur.rowcount
-    return inserted
+            row = cur.fetchone()
+            if row and row[0]:
+                inserted += 1
+            else:
+                updated += 1
+    return {"inserted": inserted, "updated": updated}
 
 
 def registry():

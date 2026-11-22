@@ -171,7 +171,7 @@ def seed_demo() -> dict[str, Any]:
     from laptop_dss.catalog.adapters.seed_data import DEMO_MODELS
     from laptop_dss.profiles.adapters import repository as profiles_repo
 
-    inserted = catalog_repo.seed(DEMO_MODELS)
+    counts = catalog_repo.seed(DEMO_MODELS)
     email = os.environ.get("SEED_ADMIN_EMAIL", "admin@example.com")
     configured = os.environ.get("SEED_ADMIN_PASSWORD")
     if not configured:
@@ -183,4 +183,8 @@ def seed_demo() -> dict[str, Any]:
     if profiles_repo.find_user_by_email(email) is None:
         profiles_repo.create_user(email, auth.hash_password(password), role="maintainer")
         created_admin = True
-    return {"models_inserted": inserted, "admin_created": created_admin}
+    return {
+        "models_inserted": counts["inserted"],
+        "models_updated": counts["updated"],
+        "admin_created": created_admin,
+    }
