@@ -25,8 +25,21 @@ ok    replay is stable after the catalog changes
 ok    comparison: 2-4 models, direction-aware best values
 ok    maintainer can add, retire, and republish a model
 ok    logout invalidates the session
+ok    event handlers are idempotent on replay
 
-20 checks passed, 0 failed
+21 checks passed, 0 failed
+```
+
+## Performance (SC-004)
+
+`cd backend && python tests/perf/test_rank_5000.py`:
+
+```text
+models: 5000 (built in 146 ms)
+ranking runs: [215, 209, 244, 220, 254] ms
+median: 219.5 ms
+p95:    260.9 ms
+PASS
 ```
 
 ## What each group proves

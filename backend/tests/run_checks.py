@@ -49,6 +49,7 @@ _API_CHECKS = {
     "comparison: 2-4 models, direction-aware best values",
     "maintainer can add, retire, and republish a model",
     "logout invalidates the session",
+    "event handlers are idempotent on replay",
 }
 
 
@@ -412,6 +413,20 @@ def _() -> None:
 def _() -> None:
     assert client.post("/api/v1/auth/logout").status_code == 204
     assert client.get("/api/v1/auth/me").status_code == 401
+
+
+@check("event handlers are idempotent on replay")
+def _() -> None:
+    from laptop_dss.shared.adapters.events import InProcessEventBus, claim_processed
+    from laptop_dss.shared.application.events import DomainEvent
+
+    seen: list[object] = []
+    bus = InProcessEventBus(claim=claim_processed)
+    bus.subscribe("CheckEvent", lambda event: seen.append(event.event_id), name="check_handler")
+    event = DomainEvent(name="CheckEvent", payload={"x": 1})
+    assert bus.publish(event) == 1
+    assert bus.publish(event) == 0, "a replayed event must not re-run the handler"
+    assert len(seen) == 1
 
 
 def main() -> int:

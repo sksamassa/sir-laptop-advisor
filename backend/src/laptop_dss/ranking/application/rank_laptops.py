@@ -13,6 +13,8 @@ from laptop_dss.ranking.adapters import repository as ranking_repo
 from laptop_dss.ranking.adapters.vectorized_sir import rank as sir_rank
 from laptop_dss.ranking.domain.explanation import build_reason, contribution_payload
 from laptop_dss.ranking.domain.sir_reference import SirScore
+from laptop_dss.shared.adapters import events
+from laptop_dss.shared.application.events import DomainEvent
 
 ALGORITHM_VERSION = "sir-1.0.0"
 
@@ -111,6 +113,16 @@ def create_ranking(
         criteria_version=registry.content_hash,
         algorithm_version=ALGORITHM_VERSION,
         items=items,
+    )
+    events.publish(
+        DomainEvent(
+            name="RankingComputed",
+            payload={
+                "ranking_id": str(ranking_id),
+                "candidate_count": total,
+                "user_id": str(user_id) if user_id else None,
+            },
+        )
     )
     return {
         "ranking_id": str(ranking_id),

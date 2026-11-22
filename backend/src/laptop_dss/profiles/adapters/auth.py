@@ -15,6 +15,8 @@ from laptop_dss.catalog.domain.criteria import load_registry
 from laptop_dss.config import load_settings
 from laptop_dss.profiles.adapters import repository as repo
 from laptop_dss.profiles.domain.weights import WeightSet
+from laptop_dss.shared.adapters import events
+from laptop_dss.shared.application.events import DomainEvent
 from laptop_dss.shared.domain.errors import Conflict, InvalidWeights, NotFound, Unauthorized, ValidationError
 
 _hasher = PasswordHasher()
@@ -119,7 +121,7 @@ def save_profile(
     if form_factor is not None and form_factor not in registry.form_factors:
         raise ValidationError("Недопустимый форм-фактор")
     weights.assert_normalized()
-    return repo.upsert_profile(
+    saved = repo.upsert_profile(
         uuid.UUID(user_id),
         goals=goals,
         budget_minor=budget_minor,
@@ -129,6 +131,13 @@ def save_profile(
         weights=weights,
         partial=partial,
     )
+    events.publish(
+        DomainEvent(
+            name="ProfileSaved",
+            payload={"user_id": user_id, "revision": saved["revision"]},
+        )
+    )
+    return saved
 
 
 def saved_weights(user_id: str) -> WeightSet | None:

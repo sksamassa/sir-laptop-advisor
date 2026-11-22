@@ -60,7 +60,7 @@ No user story can start until this phase is complete.
 - [x] T012 [P] Add `backend/tests/contract/test_criteria_registry.py` asserting schema validity, loader invariants, exactly seven criteria, and a failing drift check when generated files are stale
 - [ ] T013 [P] Add `frontend/tests/criteria.test.ts` asserting the generated TypeScript registry exposes the same keys, labels, and directions as the JSON source
 - [x] T014 [P] Implement the shared kernel in `backend/src/laptop_dss/shared/domain/`: `ids.py` (UUID newtypes), `money.py` (integer kopecks, RUB formatting), `errors.py` (domain error hierarchy), `clock.py` (Clock protocol)
-- [ ] T015 [P] Implement the event bus port in `backend/src/laptop_dss/shared/application/events.py` and the in-process adapter with `processed_events` idempotency in `backend/src/laptop_dss/shared/adapters/events.py`
+- [x] T015 [P] Implement the event bus port in `backend/src/laptop_dss/shared/application/events.py` and the in-process adapter with `processed_events` idempotency in `backend/src/laptop_dss/shared/adapters/events.py`
 - [x] T016 [P] Implement the persistence base in `backend/src/laptop_dss/shared/adapters/db.py`: async engine/session factory, deterministic constraint naming, unit-of-work context manager
 - [x] T017 Initialize Alembic (`backend/alembic.ini`, `backend/migrations/env.py`) and write revision `0001` creating `users`, `sessions`, `profiles`, `device_models` with every constraint from `data-model.md` (weight `CHECK` summing to 1 ± 1e-6, unique `(brand, model_name)`, `role`, `status`)
 - [ ] T018 Write Alembic revision `0002` creating `rankings`, `ranking_items`, and `processed_events` with keys and indexes from `data-model.md`
@@ -68,7 +68,7 @@ No user story can start until this phase is complete.
 - [x] T020 [P] Implement request-id middleware, PII-free structured logging, and the error handler producing the `{"error":{"code","message","details"}}` body defined in `contracts/api.md`, in `backend/src/laptop_dss/api/middleware.py`
 - [x] T021 [P] Configure CORS from `CORS_ORIGINS` (explicit allowlist, no wildcard with credentials), security headers, and session cookie settings in `backend/src/laptop_dss/api/security.py`
 - [x] T022 [P] Build the test harness in `backend/tests/conftest.py`: PostgreSQL from `docker compose`, per-test transaction rollback, `httpx.AsyncClient` bound to the app, seeded criteria registry
-- [ ] T023 [P] Add `.github/workflows/ci.yml` running ruff, `mypy --strict`, pytest with coverage, `tsc --noEmit`, ESLint, `pip-audit`, `npm audit`, and the criteria codegen drift check
+- [x] T023 [P] Add `.github/workflows/ci.yml` running ruff, `mypy --strict`, pytest with coverage, `tsc --noEmit`, ESLint, `pip-audit`, `npm audit`, and the criteria codegen drift check
 - [x] T024 [P] Start `docs/glossary.md` with one entry per concept (критерий, вес, альтернатива, превосходство, неполноценность, ранжирование, допустимое множество) in Russian and English
 
 **Checkpoint**: migrations apply cleanly on an empty database, seeds load twice without error,
@@ -194,10 +194,10 @@ net score and names the criteria responsible for the gap to rank 1.
 **Purpose**: Hardening, documentation, and end-to-end proof across stories.
 
 - [x] T067 [P] Complete `README.md`: install, `make up`, migrate, seed, run tests, and reproduce one SIR ranking end to end
-- [ ] T068 [P] Record decisions in `docs/adr/0001-sir-decomposition.md` and `docs/adr/0002-ranking-snapshots.md`
-- [ ] T069 [P] Add a performance test with 5,000 generated models asserting ranking p95 under 300 ms in `backend/tests/perf/test_rank_5000.py`
+- [x] T068 [P] Record decisions in `docs/adr/0001-sir-decomposition.md` and `docs/adr/0002-ranking-snapshots.md`
+- [x] T069 [P] Add a performance test with 5,000 generated models asserting ranking p95 under 300 ms in `backend/tests/perf/test_rank_5000.py`
 - [ ] T070 [P] Write the Playwright flow (guest ranking → details → compare → register → saved weights) in `e2e/guest-to-profile.spec.ts`
-- [ ] T071 Security hardening pass: verify cookie flags, rate limits, CORS allowlist, dependency audit, and secret scan; record evidence in `docs/security-review.md`
+- [x] T071 Security hardening pass: verify cookie flags, rate limits, CORS allowlist, dependency audit, and secret scan; record evidence in `docs/security-review.md`
 - [ ] T072 Enforce the coverage gate (≥ 80% on `domain/` and `ranking/`) in `backend/pyproject.toml` and the frontend coverage config
 - [x] T073 [P] Record the results of quickstart scenarios V1–V12 in `docs/validation.md`
 - [ ] T074 Final verification: `make lint`, `make typecheck`, `make test`, `make e2e`, and the quickstart walkthrough all pass
@@ -298,8 +298,8 @@ Task: "Profile form in frontend/src/features/profile/ProfileForm.tsx"
 
 ## Implementation Status (2026-11-22)
 
-Checked: **49 of 74** tasks. Verified by
-`backend/tests/run_checks.py`: 20/20 checks pass against PostgreSQL 16
+Checked: **54 of 74** tasks. Verified by
+`backend/tests/run_checks.py`: 21/21 checks pass against PostgreSQL 16
 (see `docs/validation.md`).
 
 **Environment-driven deviations (recorded, not silent):**
@@ -316,9 +316,9 @@ Checked: **49 of 74** tasks. Verified by
   installed or built. The API contract they target is complete and tested.
 - T045: `WeightSet` is implemented in the domain; `User`, `Session`, and
   `Profile` remain plain persistence records rather than rich entities.
-- T015: the in-process event bus and `processed_events` idempotency are not
-  implemented; the table exists in the schema.
-- T023, T068–T072, T074: CI workflow, ADRs, 5 000-model performance test,
-  Playwright flow, security review record, coverage gate, and the final
+- T015: the in-process event bus and `processed_events` idempotency are
+  implemented; `RankingComputed` and `ProfileSaved` are published and the replay
+  guard is exercised by the checks.
+- T070, T072, T074: the Playwright flow, a coverage run, and the final
   lint/typecheck run are outstanding (ruff, mypy, pytest, and Playwright are not
   installable offline).

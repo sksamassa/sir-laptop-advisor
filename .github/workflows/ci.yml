@@ -1,0 +1,79 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: dss
+          POSTGRES_PASSWORD: dss
+          POSTGRES_DB: laptop_dss
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U dss" --health-interval 5s
+          --health-timeout 3s --health-retries 20
+    env:
+      DATABASE_URL: postgresql://dss:dss@127.0.0.1:5432/laptop_dss
+      SESSION_SECRET: ci-only-secret
+      CORS_ORIGINS: http://localhost:3000
+      RATE_LIMIT_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install backend with dev tools
+        run: pip install -e "backend[dev]"
+      - name: Lint
+        run: ruff check backend/src backend/tests
+      - name: Format check
+        run: ruff format --check backend/src backend/tests
+      - name: Type check (domain and application layers)
+        run: mypy --config-file backend/pyproject.toml backend/src/laptop_dss/*/domain backend/src/laptop_dss/shared/domain
+      - name: Acceptance checks (unit + API)
+        working-directory: backend
+        run: python tests/run_checks.py
+      - name: Unit checks
+        working-directory: backend
+        run: python tests/run_checks.py --unit-only
+      - name: Coverage on domain and ranking
+        working-directory: backend
+        run: pytest --cov=laptop_dss --cov-fail-under=80 tests/unit
+      - name: Dependency audit
+        run: pip-audit -r backend/pyproject.toml || true
+
+  criteria-codegen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Generated criteria constants must be current
+        run: node shared/criteria.codegen.mjs --check
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Frontend gates (skipped until the app exists)
+        run: |
+          if [ ! -f frontend/package.json ]; then
+            echo "frontend/package.json not present yet; skipping"
+            exit 0
+          fi
+          cd frontend
+          npm ci
+          npx tsc --noEmit
+          npm run lint --if-present
+          npm test --if-present
