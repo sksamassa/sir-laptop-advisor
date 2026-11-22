@@ -1,0 +1,93 @@
+# Laptop Selection DSS — SIR service
+
+Сервис поддержки принятия решений для выбора ноутбука методом SIR
+(Superiority and Inferiority Ranking) по семи критериям, с объяснением каждого
+результата и воспроизводимыми ранжированиями.
+
+Feature: `specs/001-sir-laptop-selection/` (spec, plan, research, data model,
+API contract, tasks).
+
+## Current implementation status
+
+| Area | Status |
+|------|--------|
+| Criteria registry (`shared/criteria.json` + codegen) | Implemented |
+| SIR kernel: reference `O(n²·m)` + vectorized `O(m·n log n)` | Implemented, equivalence tested at `1e-9` |
+| Backend API: catalog, auth, profiles, rankings, replay, comparison, admin | Implemented |
+| PostgreSQL schema + versioned SQL migrations | Implemented (`backend/migrations`) |
+| Executable acceptance checks (20, incl. HTTP against PostgreSQL) | **Passing** (see `docs/validation.md`) |
+| Next.js frontend (US1–US4 screens) | **Not implemented** — npm registry unreachable in this environment |
+| ruff / mypy / pytest gates | Configured, not run (packages unavailable offline) |
+
+## Run it
+
+Prerequisites: Python 3.12 with the packages listed in `backend/pyproject.toml`,
+and a PostgreSQL 16 database. Any PostgreSQL works; point `DATABASE_URL` at it.
+
+```bash
+cp .env.example .env                 # set DATABASE_URL and SECRETS
+export PYTHONPATH=backend/src
+python -m laptop_dss.shared.adapters.db   # or: make migrate
+python -c "from laptop_dss.main import seed_demo; print(seed_demo())"
+python -m uvicorn laptop_dss.main:app --app-dir backend/src --port 8000
+```
+
+OpenAPI: <http://127.0.0.1:8000/docs>. Health: `/api/v1/health`.
+
+Demo maintainer comes from `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`
+(defaults `admin@example.com` / `admin-password-12`; change them).
+
+## Verify
+
+```bash
+make test        # 20 acceptance checks; needs a reachable PostgreSQL
+make test-unit   # SIR kernel checks only; no database required
+```
+
+The checks reset the `public` schema of the configured database. Point
+`DATABASE_URL` at a scratch database.
+
+## Reproduce the SIR result from the prototype notebook
+
+```bash
+curl -s -X POST localhost:8000/api/v1/rankings \
+  -H 'content-type: application/json' \
+  -d '{"budget_minor": 8000000, "goals": ["study","development"],
+       "weights": {"price":0.25,"performance":0.20,"memory":0.10,
+                   "weight":0.10,"battery":0.15,"screen":0.10,"warranty":0.10}}' | jq
+```
+
+The response carries `rank`, `net_score`, and per-criterion `normalized` and
+`contribution` values; with the notebook's linear preference (`q=0, p=1`) the
+order matches `_notebook/` within `1e-6`.
+
+## Architecture
+
+```text
+backend/src/laptop_dss/
+├── shared/      # ids, money, errors, clock, db pool + SQL migrator
+├── catalog/     # criteria registry, DeviceModel, catalog reads/admin
+├── profiles/    # WeightSet, users/sessions/profiles, auth use cases
+├── ranking/     # SIR reference + vectorized engines, rank/compare use cases
+└── api/         # schemas, dependencies, routes, app factory in main.py
+shared/criteria.json   # the single authored criteria definition
+frontend/              # generated criteria types only (app not built)
+```
+
+## Known deviations from the plan
+
+1. **Persistence stack**: the plan specified SQLAlchemy 2 async + Alembic. This
+   environment has no package index, so the adapters use `psycopg2` and a small
+   versioned SQL migrator (`backend/migrations/*.sql`). The repository boundary
+   is unchanged, so swapping in SQLAlchemy/Alembic later touches only adapters.
+2. **Frontend**: Next.js/Tailwind/shadcn cannot be installed offline. The
+   contract, schemas, and API are ready; the screens are the remaining work.
+3. **pytest suite**: `backend/tests/unit/*` and `conftest.py` target pytest for
+   CI, while `backend/tests/run_checks.py` is the stdlib runner used here.
+
+## Security notes
+
+Argon2id password hashes; opaque 256-bit session tokens stored only as SHA-256
+digests; `HttpOnly; SameSite=Lax` cookie (Secure in production); ownership
+resolved from the session only; Pydantic `extra="forbid"` on every write;
+parameterized SQL throughout; explicit CORS allowlist; PII-free structured logs.

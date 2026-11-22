@@ -1,0 +1,87 @@
+{
+  "version": "1.0.0",
+  "criteria": [
+    {
+      "key": "price",
+      "order": 1,
+      "label_ru": "Цена",
+      "direction": "min",
+      "unit": "RUB",
+      "storage_field": "price_minor",
+      "indifference_threshold": 0.0,
+      "preference_threshold": 1.0,
+      "display_decimals": 0
+    },
+    {
+      "key": "performance",
+      "order": 2,
+      "label_ru": "Производительность процессора",
+      "direction": "max",
+      "unit": "points",
+      "storage_field": "cpu_score",
+      "indifference_threshold": 0.0,
+      "preference_threshold": 1.0,
+      "display_decimals": 0
+    },
+    {
+      "key": "memory",
+      "order": 3,
+      "label_ru": "Объём оперативной памяти",
+      "direction": "max",
+      "unit": "GB",
+      "storage_field": "ram_gb",
+      "indifference_threshold": 0.0,
+      "preference_threshold": 1.0,
+      "display_decimals": 0
+    },
+    {
+      "key": "weight",
+      "order": 4,
+      "label_ru": "Вес",
+      "direction": "min",
+      "unit": "g",
+      "storage_field": "weight_g",
+      "indifference_threshold": 0.0,
+      "preference_threshold": 1.0,
+      "display_decimals": 0
+    },
+    {
+      "key": "battery",
+      "order": 5,
+      "label_ru": "Время автономной работы",
+      "direction": "max",
+      "unit": "minutes",
+      "storage_field": "battery_minutes",
+      "indifference_threshold": 0.0,
+      "preference_threshold": 1.0,
+      "display_decimals": 0
+    },
+    {
+      "key": "screen",
+      "order": 6,
+      "label_ru": "Качество экрана",
+      "direction": "max",
+      "unit": "score_0_10",
+      "storage_field": "screen_score",
+      "indifference_threshold": 0.0,
+      "preference_threshold": 1.0,
+      "display_decimals": 1
+    },
+    {
+      "key": "warranty",
+      "order": 7,
+      "label_ru": "Гарантия",
+      "direction": "max",
+      "unit": "months",
+      "storage_field": "warranty_months",
+      "indifference_threshold": 0.0,
+      "preference_threshold": 1.0,
+      "display_decimals": 0
+    }
+  ],
+  "vocabularies": {
+    "goals": ["study", "development", "design", "gaming"],
+    "os": ["windows", "macos", "linux"],
+    "form_factor": ["ultrabook", "laptop", "gaming", "convertible"]
+  }
+}

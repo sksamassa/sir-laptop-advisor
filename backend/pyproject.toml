@@ -1,0 +1,61 @@
+[project]
+name = "laptop-dss"
+version = "0.1.0"
+description = "SIR-based laptop selection service (coursework)"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "pydantic>=2.7",
+  "sqlalchemy[asyncio]>=2.0.30",
+  "asyncpg>=0.29",
+  "alembic>=1.13",
+  "argon2-cffi>=23.1",
+  "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2",
+  "pytest-asyncio>=0.23",
+  "pytest-cov>=5",
+  "httpx>=0.27",
+  "ruff>=0.5",
+  "mypy>=1.10",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["B008"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_ignores = true
+files = ["src/laptop_dss/profiles/domain", "src/laptop_dss/catalog/domain", "src/laptop_dss/ranking/domain", "src/laptop_dss/shared/domain"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["src"]
+filterwarnings = ["error::DeprecationWarning:laptop_dss.*"]
+
+[tool.coverage.run]
+source = ["laptop_dss"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 80
+omit = ["*/migrations/*", "*/__init__.py"]
