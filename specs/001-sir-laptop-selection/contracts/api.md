@@ -59,6 +59,7 @@ All errors use:
 | PATCH | `/admin/models/{id}` | maintainer | Update a model |
 | POST | `/admin/models/{id}/retire` | maintainer | Retire a model |
 | POST | `/admin/models/{id}/publish` | maintainer | Restore a retired model |
+| POST | `/admin/catalog/refresh` | maintainer | Pull the catalog from the configured live source, falling back to CSV |
 
 ---
 
@@ -163,7 +164,19 @@ re-running SIR on a subset would change normalization and could reorder results.
 
 Query: `brand`, `os`, `form_factor`, `max_price_minor`, `q` (name search), `page` (default 1),
 `page_size` (default 20, max 100), `sort` (`price_asc|price_desc|name`). Response:
-`{ "items": [...], "page": 1, "page_size": 20, "total": 137 }`. Only `active` models appear.
+`{ "items": [...], "page": 1, "page_size": 20, "total": 137, "meta": { "source": "live:https://…",
+"fetched_at": "2026-11-22T15:10:00Z", "tracked": 36, "total": 36 } }`. Only `active` models
+appear. `meta` reports where the visible prices came from and when, so the UI never implies
+live data it does not have.
+
+### `POST /admin/catalog/refresh`
+
+Runs the configured source chain in order: `CATALOG_LIVE_URL` (JSON feed), then
+`CATALOG_HTML_CONFIG` (CSS selectors for a page you are permitted to read), then
+`CATALOG_CSV_PATH`. Returns `{ "source": "live:…", "inserted": 0, "updated": 36, "errors": [],
+"fallback_errors": ["live:…: HTTP 403"], "fetched_at": "…" }`. If every source fails it returns
+`503 catalog_unavailable` and the catalog is left untouched — a failed refresh never empties
+the service.
 
 ### `GET /profile` and `PUT /profile`
 

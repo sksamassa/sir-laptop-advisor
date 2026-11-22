@@ -63,7 +63,7 @@ No user story can start until this phase is complete.
 - [x] T015 [P] Implement the event bus port in `backend/src/laptop_dss/shared/application/events.py` and the in-process adapter with `processed_events` idempotency in `backend/src/laptop_dss/shared/adapters/events.py`
 - [x] T016 [P] Implement the persistence base in `backend/src/laptop_dss/shared/adapters/db.py`: async engine/session factory, deterministic constraint naming, unit-of-work context manager
 - [x] T017 Initialize Alembic (`backend/alembic.ini`, `backend/migrations/env.py`) and write revision `0001` creating `users`, `sessions`, `profiles`, `device_models` with every constraint from `data-model.md` (weight `CHECK` summing to 1 ± 1e-6, unique `(brand, model_name)`, `role`, `status`)
-- [ ] T018 Write Alembic revision `0002` creating `rankings`, `ranking_items`, and `processed_events` with keys and indexes from `data-model.md`
+- [x] T018 Write Alembic revision `0002` creating `rankings`, `ranking_items`, and `processed_events` with keys and indexes from `data-model.md`
 - [x] T019 [P] Author `backend/fixtures/models.seed.json` (about 40 models spanning brands, OS, form factors, and prices from 45 000 to 350 000 ₽) and the idempotent loader `backend/src/laptop_dss/catalog/adapters/seed.py` keyed on `(brand, model_name)`
 - [x] T020 [P] Implement request-id middleware, PII-free structured logging, and the error handler producing the `{"error":{"code","message","details"}}` body defined in `contracts/api.md`, in `backend/src/laptop_dss/api/middleware.py`
 - [x] T021 [P] Configure CORS from `CORS_ORIGINS` (explicit allowlist, no wildcard with credentials), security headers, and session cookie settings in `backend/src/laptop_dss/api/security.py`
@@ -300,29 +300,33 @@ Task: "Profile form in frontend/src/features/profile/ProfileForm.tsx"
 
 ---
 
+---
+
 ## Implementation Status (2026-11-22)
 
-Checked: **72 of 74** tasks. Verification evidence:
+Checked: **73 of 74** tasks. Verification evidence:
 
-- `backend/tests/run_checks.py` — **24/24** checks against PostgreSQL 16.
-- `backend/tests/coverage_report.py --full` — **96.3%** domain statement coverage
-  (gate: 80%), measured with the stdlib tracer because pytest-cov is unavailable.
-- `frontend/e2e` via Playwright on the system Edge — **4/4**: guest ranking with
-  explanations, comparison of three models, catalog OS filter, anonymous profile.
-- `frontend/tests/criteria.test.mjs` — **3/3** (generated constants match the registry).
+- `backend/tests/run_checks.py` — **28/28** checks against PostgreSQL 16.
+- `backend/tests/coverage_report.py --full` — **96.4%** domain statement coverage (gate 80%).
+- `frontend/e2e` via Playwright on the system Edge — **4/4**.
+- `frontend/tests/criteria.test.mjs` — **3/3**.
 - `next build` and `tsc --noEmit` — clean.
 
-**Open (2):**
+**Open (1):**
 
-- **T018** — the ranking and event tables live in the single `0001_init.sql`
-  migration. Splitting an already-applied migration would rewrite history on
-  existing databases for no functional gain; a future schema change will add a
-  second revision instead.
-- **T045** — `WeightSet` carries the weight invariants and is used by the
-  application layer; `User`, `Session`, and `Profile` remain persistence records.
-  Promoting them to rich entities is a refactor with no behaviour change.
+- **T045** — `WeightSet` carries the weight invariants and is used by the application
+  layer; `User`, `Session`, and `Profile` remain persistence records. Promoting them to
+  rich entities is a refactor with no behaviour change.
 
-**Environment deviations:** SQLAlchemy 2/Alembic could not be installed, so the
-adapters use `psycopg2` with one versioned SQL migration; pytest was unavailable, so
-the checks and the coverage tracer are stdlib; Framer Motion was replaced by CSS
-keyframes and the shadcn/ui conventions are implemented locally.
+**Resolved during follow-up work:**
+
+- **T018** — a genuine second migration (`0002_catalog_provenance.sql`) now adds the
+  catalog `source`/`fetched_at` columns, so schema evolution is incremental.
+- The catalog can refresh from a live source (JSON feed or a permitted HTML page), with
+  CSV and the bundled snapshot as fallbacks; provenance is stored per model and shown in
+  the UI.
+
+**Environment deviations:** SQLAlchemy 2/Alembic could not be installed, so the adapters
+use `psycopg2` with versioned SQL migrations; pytest was unavailable, so the checks and the
+coverage tracer are stdlib; Framer Motion was replaced by CSS keyframes and the shadcn/ui
+conventions are implemented locally.

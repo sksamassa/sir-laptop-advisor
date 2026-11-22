@@ -239,8 +239,11 @@ one hurt it most.
 - **Single market and currency**: prices are in Russian rubles, include tax, and refer to one
   retail market. Currency conversion, regional pricing, and live price feeds are out of
   scope.
-- **Curated catalog**: a maintainer keeps the catalog current; the service does not scrape
-  retailer sites. Catalog size is expected to stay below 5,000 models.
+- **Catalog source**: a maintainer refreshes the catalog from a configured live source
+  (JSON feed or an HTML page they are permitted to read) or a CSV export; the service does
+  not scrape retailer sites by default, records the source and fetch time per model, and
+  degrades to the last good data rather than emptying the catalog. Catalog size is expected
+  to stay below 5,000 models.
 - **No transaction handling**: the service recommends devices and links to details; it does
   not sell, reserve, or process payments.
 - **Guest use**: a visitor can obtain a ranking without an account. Accounts exist to save

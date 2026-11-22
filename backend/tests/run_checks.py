@@ -40,6 +40,7 @@ _API_CHECKS = {
     "health and criteria endpoints",
     "catalog listing, filtering, pagination",
     "catalog can be refreshed from a CSV of real prices",
+    "live catalog refresh falls back and records provenance",
     "guest ranking is ordered, budget-bounded, and explained",
     "guest ranking is replayable and comparable by its id",
     "empty budget returns an empty state, not an error",
@@ -232,6 +233,80 @@ def _() -> None:
     page = client.get("/api/v1/models", params={"page": 2, "page_size": 5}).json()
     assert len(page["items"]) <= 5
     assert page["page"] == 2
+
+
+@check("live catalog refresh falls back and records provenance")
+def _() -> None:
+    from laptop_dss.catalog.adapters.sources import (
+        CatalogSourceError,
+        JsonEndpointSource,
+        refresh,
+    )
+
+    payload = {
+        "products": [
+            {
+                "brand": "LiveTest",
+                "name": "Live One",
+                "price": "55 990",
+                "cpu": 5000,
+                "ram": 16,
+                "weight": 1400,
+                "battery": 600,
+                "screen": 8.0,
+                "warranty": 24,
+                "os": "windows",
+                "form_factor": "laptop",
+            }
+        ]
+    }
+    field_map = {
+        "brand": "brand",
+        "model_name": "name",
+        "price_rub": "price",
+        "cpu_score": "cpu",
+        "ram_gb": "ram",
+        "weight_g": "weight",
+        "battery_minutes": "battery",
+        "screen_score": "screen",
+        "warranty_months": "warranty",
+        "os": "os",
+        "form_factor": "form_factor",
+    }
+    good = JsonEndpointSource(
+        "http://example.invalid/feed", field_map=field_map, fetch_json=lambda _: payload
+    )
+
+    def unavailable(_: str):  # noqa: ANN202
+        raise CatalogSourceError("HTTP 403 from retailer")
+
+    blocked = JsonEndpointSource(
+        "http://retailer.invalid/feed", field_map=field_map, fetch_json=unavailable, name="live:retailer"
+    )
+
+    result = refresh([blocked, good])
+    assert result["source"].startswith("live:http://example.invalid"), result
+    assert result["inserted"] == 1, result
+    assert result["fallback_errors"], "the blocked source must be reported"
+    assert "403" in result["fallback_errors"][0]
+
+    stored = db.fetch_one("SELECT source, fetched_at FROM device_models WHERE brand = 'LiveTest'")
+    assert stored is not None and stored["source"] and stored["fetched_at"]
+
+    meta = client.get("/api/v1/models").json()["meta"]
+    assert meta["source"] is not None and meta["fetched_at"]
+
+    before = catalog_total()
+    failed = refresh([blocked])
+    assert failed["source"] is None
+    assert failed["inserted"] == 0 and failed["updated"] == 0
+    assert catalog_total() == before, "a failed refresh must not clear the catalog"
+
+    db.execute("DELETE FROM device_models WHERE brand = 'LiveTest'")
+
+
+def catalog_total() -> int:
+    return int(client.get("/api/v1/models", params={"page_size": 1}).json()["total"])
 
 
 @check("catalog can be refreshed from a CSV of real prices")

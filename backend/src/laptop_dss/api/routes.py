@@ -29,7 +29,12 @@ from laptop_dss.ranking.adapters import repository as ranking_repo
 from laptop_dss.ranking.application import compare as compare_uc
 from laptop_dss.ranking.application import rank_laptops
 from laptop_dss.shared.adapters import db
-from laptop_dss.shared.domain.errors import Conflict, NotFound, ValidationError
+from laptop_dss.shared.domain.errors import (
+    Conflict,
+    NotFound,
+    UpstreamUnavailable,
+    ValidationError,
+)
 
 router = APIRouter(prefix="/api/v1")
 settings = load_settings()
@@ -130,7 +135,13 @@ def list_models(
         page_size=page_size,
         sort=sort,
     )
-    return {"items": [_model_payload(row) for row in rows], "page": page, "page_size": page_size, "total": total}
+    return {
+        "items": [_model_payload(row) for row in rows],
+        "page": page,
+        "page_size": page_size,
+        "total": total,
+        "meta": catalog_repo.catalog_meta(),
+    }
 
 
 @router.get("/models/{model_id}")
@@ -338,6 +349,26 @@ def comparison(
 
 
 # ------------------------------------------------------------------ admin catalog
+
+
+@router.post("/admin/catalog/refresh")
+def refresh_catalog(
+    _: dict[str, Any] = Depends(deps.require_maintainer),
+) -> dict[str, Any]:
+    """Pull the catalog from the configured live source, falling back to CSV."""
+    from laptop_dss.catalog.adapters import sources as catalog_sources
+
+    configured = catalog_sources.configured_sources()
+    if not configured:
+        raise ValidationError(
+            "Источник не настроен: задайте CATALOG_LIVE_URL, CATALOG_HTML_CONFIG или CATALOG_CSV_PATH"
+        )
+    result = catalog_sources.refresh(configured)
+    if not result["source"]:
+        raise UpstreamUnavailable(
+            "Ни один источник каталога не ответил", errors=result["fallback_errors"]
+        )
+    return result
 
 
 @router.post("/admin/models", status_code=201)

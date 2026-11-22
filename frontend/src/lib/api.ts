@@ -100,11 +100,19 @@ export interface Profile {
   updated_at: string;
 }
 
+export interface CatalogMeta {
+  source: string | null;
+  fetched_at: string | null;
+  tracked: number;
+  total: number;
+}
+
 export interface CatalogPage {
   items: ModelSnapshot[];
   page: number;
   page_size: number;
   total: number;
+  meta?: CatalogMeta;
 }
 
 export class ApiError extends Error {

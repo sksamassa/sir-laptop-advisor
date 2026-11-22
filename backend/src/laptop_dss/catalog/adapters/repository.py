@@ -106,12 +106,18 @@ def eligible_by_budget(budget_minor: int) -> list[DeviceModel]:
     return [_to_domain(row) for row in rows]
 
 
-def insert_model(data: Mapping[str, Any]) -> dict[str, Any]:
+def insert_model(
+    data: Mapping[str, Any],
+    *,
+    source: str | None = None,
+    fetched_at: object | None = None,
+) -> dict[str, Any]:
     model_id = uuid.uuid4()
     row = db.fetch_one(
         "INSERT INTO device_models (id, brand, model_name, slug, os, form_factor, price_minor, "
         "cpu_score, ram_gb, weight_g, battery_minutes, screen_score, warranty_months, status, "
-        "published_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'active', now()) "
+        "published_at, source, fetched_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, "
+        "%s, %s, 'active', now(), %s, %s) "
         f"RETURNING {_COLUMNS}",
         (
             model_id,
@@ -127,13 +133,21 @@ def insert_model(data: Mapping[str, Any]) -> dict[str, Any]:
             data["battery_minutes"],
             data["screen_score"],
             data["warranty_months"],
+            source,
+            fetched_at,
         ),
     )
     assert row is not None
     return row
 
 
-def update_model(model_id: uuid.UUID, data: Mapping[str, Any]) -> dict[str, Any] | None:
+def update_model(
+    model_id: uuid.UUID,
+    data: Mapping[str, Any],
+    *,
+    source: str | None = None,
+    fetched_at: object | None = None,
+) -> dict[str, Any] | None:
     allowed = (
         "brand",
         "model_name",
@@ -153,10 +167,35 @@ def update_model(model_id: uuid.UUID, data: Mapping[str, Any]) -> dict[str, Any]
         return get_model(model_id)
     assignments = ", ".join(f"{key} = %s" for key in fields) + ", updated_at = now()"
     values = [data[key] for key in fields]
+    if source is not None:
+        assignments += ", source = %s"
+        values.append(source)
+    if fetched_at is not None:
+        assignments += ", fetched_at = %s"
+        values.append(fetched_at)
     return db.fetch_one(
         f"UPDATE device_models SET {assignments} WHERE id = %s RETURNING {_COLUMNS}",
         [*values, model_id],
     )
+
+
+def catalog_meta() -> dict[str, Any]:
+    """Where the visible catalog came from and how fresh it is."""
+    row = db.fetch_one(
+        "SELECT max(fetched_at) AS fetched_at, "
+        "(SELECT source FROM device_models WHERE fetched_at IS NOT NULL "
+        " ORDER BY fetched_at DESC, id LIMIT 1) AS source, "
+        "count(*) FILTER (WHERE source IS NOT NULL) AS tracked, count(*) AS total "
+        "FROM device_models"
+    )
+    if row is None:
+        return {"source": None, "fetched_at": None, "tracked": 0, "total": 0}
+    return {
+        "source": row["source"],
+        "fetched_at": row["fetched_at"].isoformat() if row["fetched_at"] else None,
+        "tracked": int(row["tracked"]),
+        "total": int(row["total"]),
+    }
 
 
 def set_status(model_id: uuid.UUID, status: str) -> dict[str, Any] | None:
@@ -191,9 +230,14 @@ def seed(models: list[dict[str, Any]]) -> int:
             cur.execute(
                 "INSERT INTO device_models (id, brand, model_name, slug, os, form_factor, "
                 "price_minor, cpu_score, ram_gb, weight_g, battery_minutes, screen_score, "
-                "warranty_months, status, published_at) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'active', now()) "
-                "ON CONFLICT (brand, model_name) DO NOTHING",
+                "warranty_months, status, published_at, source, fetched_at) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'active', now(), "
+                "'seed', now()) "
+                "ON CONFLICT (brand, model_name) DO UPDATE SET price_minor = EXCLUDED.price_minor, "
+                "cpu_score = EXCLUDED.cpu_score, ram_gb = EXCLUDED.ram_gb, "
+                "weight_g = EXCLUDED.weight_g, battery_minutes = EXCLUDED.battery_minutes, "
+                "screen_score = EXCLUDED.screen_score, warranty_months = EXCLUDED.warranty_months, "
+                "source = 'seed', fetched_at = now(), updated_at = now()",
                 (
                     uuid.uuid4(),
                     item["brand"],

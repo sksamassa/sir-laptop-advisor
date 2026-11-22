@@ -40,6 +40,7 @@ test.describe("SIR laptop selection", () => {
   test("catalog lists models and filters by operating system", async ({ page }) => {
     await page.goto("/catalog");
     await expect(page.getByRole("heading", { name: /Каталог моделей/ })).toBeVisible();
+    await expect(page.getByText(/Источник:/)).toBeVisible({ timeout: 20_000 });
 
     const cards = page.locator("article");
     await expect(cards.first()).toBeVisible({ timeout: 25_000 });

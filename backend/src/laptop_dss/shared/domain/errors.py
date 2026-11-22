@@ -67,3 +67,9 @@ class Conflict(DomainError):
 class EmptyCatalog(ValidationError):
     code = "empty_catalog"
     message_ru = "Каталог пуст"
+
+
+class UpstreamUnavailable(DomainError):
+    code = "catalog_unavailable"
+    status_code = 503
+    message_ru = "Источник данных каталога недоступен"

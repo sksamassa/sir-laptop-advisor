@@ -42,6 +42,9 @@ criteria-test:
 import-prices:
 	cd backend && $(PY) -m laptop_dss.catalog.adapters.import_catalog $(CSV)
 
+refresh-catalog:
+	cd backend && $(PY) -m laptop_dss.catalog.adapters.sources $(ARGS)
+
 gen-criteria:
 	node shared/criteria.codegen.mjs
 

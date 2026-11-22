@@ -67,6 +67,12 @@ export default function CatalogPage() {
         <p className="mt-1 max-w-2xl text-xs text-[#6f7699]">
           Демонстрационный снимок ориентировочных розничных цен (ноябрь 2026), а не поток живых цен.
         </p>
+        {data?.meta?.fetched_at ? (
+          <p className="mt-1 text-xs text-[#3ddc97]/90">
+            Источник: {data.meta.source} · обновлено{" "}
+            {new Date(data.meta.fetched_at).toLocaleString("ru-RU")}
+          </p>
+        ) : null}
       </div>
 
       <Panel>

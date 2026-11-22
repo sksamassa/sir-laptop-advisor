@@ -1,4 +1,4 @@
-# Laptop Selection DSS — SIR service
+﻿# Laptop Selection DSS — SIR service
 
 Сервис поддержки принятия решений для выбора ноутбука методом SIR
 (Superiority and Inferiority Ranking) по семи критериям, с объяснением каждого
@@ -16,7 +16,7 @@ API contract, tasks).
 | Backend API: catalog, auth, profiles, rankings, replay, comparison, admin | Implemented |
 | PostgreSQL schema + versioned SQL migrations | Implemented (`backend/migrations`) |
 | In-process event bus with idempotent replay (`processed_events`) | Implemented |
-| Executable acceptance checks (27, incl. HTTP against PostgreSQL) | **Passing** (see `docs/validation.md`) |
+| Executable acceptance checks (28, incl. HTTP against PostgreSQL) | **Passing** (see `docs/validation.md`) |
 | Catalog | 36 models, **15 990 – 199 990 ₽**, indicative retail snapshot |
 | Domain statement coverage | **96.3%** (gate 80%) via `make coverage` |
 | Browser tests | **4/4** Playwright scenarios on system Edge (`make e2e`) |
@@ -54,27 +54,34 @@ Production: `npm run build && npm start`. The UI is Russian-only, responsive fro
 Demo maintainer comes from `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`
 (defaults `admin@example.com` / `admin-password-12`; change them).
 
-## Loading real prices
+## Real-time catalog
 
-The seeded catalog is an indicative retail snapshot (36 models, 15 990–199 990 ₽),
-not a live feed — the spec keeps price scraping out of scope. To run on real market
-data, export a CSV with the documented columns and import it; the import is
-idempotent by `(brand, model_name)`, so re-running updates prices instead of
-duplicating models:
+Prices can be pulled from a live source at runtime; CSV and the bundled seed remain as
+fallbacks. Sources are tried in order, and a failed refresh never empties the catalog:
+
+1. `CATALOG_LIVE_URL` — JSON feed (`CATALOG_LIVE_ITEMS_PATH` + `CATALOG_LIVE_FIELDS` mapping)
+2. `CATALOG_HTML_CONFIG` — path to a CSS-selector JSON config for a page you may read
+3. `CATALOG_CSV_PATH` — CSV export (offline fallback)
+4. the bundled demo snapshot
 
 ```bash
-make import-prices CSV=backend/fixtures/prices.example.csv
-# or: python -m laptop_dss.catalog.adapters.import_catalog prices.csv
+make refresh-catalog      # or: POST /api/v1/admin/catalog/refresh as a maintainer
+python -m laptop_dss.catalog.adapters.sources --live-url https://example/feed \
+  --fields '{"brand":"brand","model_name":"title","price_rub":"price"}'
 ```
 
-Columns: `brand,model_name,os,form_factor,price_rub,cpu_score,ram_gb,weight_g,battery_minutes,screen_score,warranty_months`.
-Invalid rows are reported by line number and skipped, and the command exits non-zero
-if any row failed.
+Every row stores `source` and `fetched_at`; `/models` exposes that as `meta` and the catalog
+page displays it, so the UI never implies live data it does not have.
+
+**Why a configurable source instead of a hard-coded shop:** retailers reject automated
+requests from here — DNS answers `401`, M.Video `403`, Citilink fails certificate
+validation — and scraping them would breach their terms. Point the service at an API or
+feed you are allowed to read; CSV is the offline fallback.
 
 ## Verify
 
 ```bash
-make test        # 27 acceptance checks; needs a reachable PostgreSQL
+make test        # 28 acceptance checks; needs a reachable PostgreSQL
 make test-unit   # SIR kernel checks only; no database required
 make coverage    # domain statement coverage (stdlib tracer)
 make e2e         # Playwright against the running UI

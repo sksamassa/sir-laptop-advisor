@@ -16,6 +16,7 @@ ok    weight contract: 0.5% input tolerance, exact normalization
 ok    health and criteria endpoints
 ok    catalog listing, filtering, pagination
 ok    catalog can be refreshed from a CSV of real prices
+ok    live catalog refresh falls back and records provenance
 ok    guest ranking is ordered, budget-bounded, and explained
 ok    guest ranking is replayable and comparable by its id
 ok    empty budget returns an empty state, not an error
@@ -33,7 +34,7 @@ ok    logout invalidates the session
 ok    domain validation and error branches
 ok    event handlers are idempotent on replay
 
-27 checks passed, 0 failed
+28 checks passed, 0 failed
 ```
 
 ## UI validation
