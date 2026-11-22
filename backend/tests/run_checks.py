@@ -40,6 +40,7 @@ _API_CHECKS = {
     "health and criteria endpoints",
     "catalog listing, filtering, pagination",
     "guest ranking is ordered, budget-bounded, and explained",
+    "guest ranking is replayable and comparable by its id",
     "empty budget returns an empty state, not an error",
     "invalid weights are rejected with 400 invalid_weights",
     "unknown fields are rejected with 422",
@@ -249,6 +250,23 @@ def _() -> None:
     CTX["guest_ranking"] = payload
 
 
+@check("guest ranking is replayable and comparable by its id")
+def _() -> None:
+    payload = CTX["guest_ranking"]
+    ranking_id = payload["ranking_id"]
+    replay = client.get(f"/api/v1/rankings/{ranking_id}")
+    assert replay.status_code == 200, replay.text
+    assert [item["rank"] for item in replay.json()["items"]] == [
+        item["rank"] for item in payload["items"]
+    ]
+    ids = [item["model"]["id"] for item in payload["items"][:3]]
+    comparison = client.post(
+        f"/api/v1/rankings/{ranking_id}/comparison", json={"model_ids": ids}
+    )
+    assert comparison.status_code == 200, comparison.text
+    assert len(comparison.json()["rows"]) == 7
+
+
 @check("empty budget returns an empty state, not an error")
 def _() -> None:
     response = client.post("/api/v1/rankings", json={"budget_minor": 100_00, "goals": ["study"]})
@@ -423,6 +441,9 @@ def _() -> None:
 
     shopper = client.post("/api/v1/admin/models", json=payload)
     assert shopper.status_code == 403, shopper.text
+
+    # leave the demo catalog clean for screenshots and manual checks
+    db.execute("DELETE FROM device_models WHERE id = %s", (model_id,))
 
 
 @check("logout invalidates the session")

@@ -16,9 +16,10 @@ API contract, tasks).
 | Backend API: catalog, auth, profiles, rankings, replay, comparison, admin | Implemented |
 | PostgreSQL schema + versioned SQL migrations | Implemented (`backend/migrations`) |
 | In-process event bus with idempotent replay (`processed_events`) | Implemented |
-| Executable acceptance checks (22, incl. HTTP against PostgreSQL) | **Passing** (see `docs/validation.md`) |
+| Executable acceptance checks (23, incl. HTTP against PostgreSQL) | **Passing** (see `docs/validation.md`) |
 | Performance: 5 000 models ranked in ~220 ms (p95 261 ms) | **Passing** (`backend/tests/perf/`) |
-| Next.js frontend (US1–US4 screens) | **Not implemented** — npm registry unreachable in this environment |
+| Next.js 15 frontend (US1–US4: ranking, details, compare, catalog, profile) | **Implemented** — `next build` passes; verified in headless Edge |
+| UI quality gates (tsc, ESLint) | `tsc --noEmit` passes; ESLint not installed offline |
 | ruff / mypy / pytest gates | Configured, not run (packages unavailable offline) |
 
 ## Run it
@@ -35,6 +36,17 @@ python -m uvicorn laptop_dss.main:app --app-dir backend/src --port 8000
 ```
 
 OpenAPI: <http://127.0.0.1:8000/docs>. Health: `/api/v1/health`.
+
+### Run the UI
+
+```bash
+cd frontend
+npm install          # see frontend/README.md if the registry is slow
+npm run dev          # http://localhost:3000, proxies /api to :8000
+```
+
+Production: `npm run build && npm start`. The UI is Russian-only, responsive from
+390 px, and screenshots of the flow are listed in `docs/validation.md`.
 
 Demo maintainer comes from `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`
 (defaults `admin@example.com` / `admin-password-12`; change them).
@@ -64,6 +76,16 @@ The response carries `rank`, `net_score`, and per-criterion `normalized` and
 `contribution` values; with the notebook's linear preference (`q=0, p=1`) the
 order matches `_notebook/` within `1e-6`.
 
+## Screens
+
+| Ranking | Explanation |
+|---|---|
+| ![Ranking](docs/screenshots/01-ranking.png) | ![Details](docs/screenshots/02-details.png) |
+
+| Comparison | Mobile |
+|---|---|
+| ![Compare](docs/screenshots/03-compare.png) | ![Mobile](docs/screenshots/04-mobile.png) |
+
 ## Architecture
 
 ```text
@@ -83,8 +105,11 @@ frontend/              # generated criteria types only (app not built)
    environment has no package index, so the adapters use `psycopg2` and a small
    versioned SQL migrator (`backend/migrations/*.sql`). The repository boundary
    is unchanged, so swapping in SQLAlchemy/Alembic later touches only adapters.
-2. **Frontend**: Next.js/Tailwind/shadcn cannot be installed offline. The
-   contract, schemas, and API are ready; the screens are the remaining work.
+2. **Frontend scope**: Next.js 15 + TypeScript + TailwindCSS are used as planned, and
+   `next build` succeeds. Components follow shadcn/ui conventions locally instead of
+   pulling the shadcn CLI, and Framer Motion was replaced by CSS keyframes; both avoid
+   another large offline dependency. No Playwright suite yet — the interactive flow is
+   verified with a small CDP script (`frontend/scripts/capture.mjs`).
 3. **pytest suite**: `backend/tests/unit/*` and `conftest.py` target pytest for
    CI, while `backend/tests/run_checks.py` is the stdlib runner used here.
 

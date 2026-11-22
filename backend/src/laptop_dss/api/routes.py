@@ -279,17 +279,20 @@ def ranking_history(
 @router.get("/rankings/{ranking_id}")
 def replay(
     ranking_id: uuid.UUID,
+    request: Request,
     brand: str | None = None,
     os: str | None = None,
     form_factor: str | None = None,
     max_price_minor: int | None = Query(default=None, ge=1),
-    user: dict[str, Any] = Depends(deps.require_user),
 ) -> dict[str, Any]:
     stored = ranking_repo.get_ranking(ranking_id)
+    user = deps.current_user(request)
     if stored is None:
         raise NotFound("Ранжирование не найдено")
-    if stored["user_id"] is None or str(stored["user_id"]) != user["id"]:
-        raise NotFound("Ранжирование не найдено")
+    # Owner-only for account rankings; a guest ranking is addressed by its id.
+    if stored["user_id"] is not None:
+        if user is None or str(stored["user_id"]) != user["id"]:
+            raise NotFound("Ранжирование не найдено")
     payload = rank_laptops.replay_ranking(ranking_id)
     assert payload is not None
 
@@ -326,9 +329,12 @@ def replay(
 def comparison(
     ranking_id: uuid.UUID,
     payload: ComparisonRequest,
-    user: dict[str, Any] = Depends(deps.require_user),
+    request: Request,
 ) -> dict[str, Any]:
-    return compare_uc.compare(ranking_id, payload.model_ids, user_id=user["id"])
+    user = deps.current_user(request)
+    return compare_uc.compare(
+        ranking_id, payload.model_ids, user_id=user["id"] if user else None
+    )
 
 
 # ------------------------------------------------------------------ admin catalog

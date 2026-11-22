@@ -29,10 +29,14 @@ Date: 2026-11-22. Scope: backend service as implemented in `backend/`.
 
 ## Residual risks
 
-1. The demo maintainer password is seeded from an environment variable with a
+1. Guest rankings are addressable by their 122-bit random id so a visitor can replay
+   and compare their own result without an account. The id is an unguessable
+   capability, but it is a bearer token: anyone given the link can read that ranking's
+   preferences. Account-owned rankings remain owner-only.
+2. The demo maintainer password is seeded from an environment variable with a
    known default; production must set `SEED_ADMIN_PASSWORD` and remove the demo
    account.
-2. Rate limiting is in-process and per-worker; a multi-worker deployment needs a
+3. Rate limiting is in-process and per-worker; a multi-worker deployment needs a
    shared store.
-3. Session cleanup runs on demand (`purge_expired_sessions`) but is not
+4. Session cleanup runs on demand (`purge_expired_sessions`) but is not
    scheduled.

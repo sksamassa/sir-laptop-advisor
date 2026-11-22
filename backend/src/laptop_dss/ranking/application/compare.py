@@ -19,7 +19,9 @@ def compare(
     ranking = ranking_repo.get_ranking(ranking_id)
     if ranking is None:
         raise NotFound("Ранжирование не найдено")
-    if ranking["user_id"] is None or str(ranking["user_id"]) != user_id:
+    # Guest rankings (no owner) are addressed by their unguessable id, which acts
+    # as a capability; account-owned rankings stay restricted to their owner.
+    if ranking["user_id"] is not None and str(ranking["user_id"]) != user_id:
         raise Forbidden("Ранжирование принадлежит другому пользователю")
 
     identifiers = [str(model_id) for model_id in model_ids]

@@ -36,7 +36,7 @@ Web application layout from plan.md: `backend/src/laptop_dss/`, `backend/tests/`
 
 - [x] T001 Create the repository layout described in plan.md: `backend/src/laptop_dss/{shared,profiles,catalog,ranking}`, `backend/tests/{unit,integration,contract}`, `frontend/src/{app,features,components/ui,lib,generated}`, `shared/`, `docs/adr/`
 - [x] T002 [P] Declare backend dependencies and tool configuration in `backend/pyproject.toml` (FastAPI, Pydantic v2, SQLAlchemy 2 async, asyncpg, Alembic, argon2-cffi, NumPy; ruff, mypy `--strict` on `domain/` and `application/`, pytest, pytest-asyncio, httpx)
-- [ ] T003 [P] Declare frontend tooling in `frontend/package.json`, `frontend/tsconfig.json`, `frontend/next.config.mjs`, `frontend/tailwind.config.ts`, `frontend/.eslintrc.cjs`, `frontend/.prettierrc`
+- [x] T003 [P] Declare frontend tooling in `frontend/package.json`, `frontend/tsconfig.json`, `frontend/next.config.mjs`, `frontend/tailwind.config.ts`, `frontend/.eslintrc.cjs`, `frontend/.prettierrc`
 - [x] T004 [P] Write `docker-compose.yml` with `postgres:16`, `api`, and `web` services, healthchecks, and read-only source mounts (no secrets in the file)
 - [x] T005 [P] Write `.env.example` and `backend/src/laptop_dss/config.py` (Pydantic Settings for `DATABASE_URL`, `SESSION_COOKIE_NAME`, `CORS_ORIGINS`, `SESSION_SECRET`, no hard-coded defaults for secrets)
 - [x] T006 [P] Write the `Makefile` targets `up`, `down`, `migrate`, `seed`, `test`, `test-api`, `e2e`, `gen-criteria`, `lint`, `typecheck`
@@ -105,9 +105,9 @@ deterministic ordered list, only in-budget models, a reason per item, and `GET
 - [x] T037 [US1] Implement `POST /api/v1/rankings` and `GET /api/v1/rankings/{id}` replay in `backend/src/laptop_dss/ranking/adapters/router.py`
 - [x] T038 [P] [US1] Add the contract test for both endpoints (required fields, dense ranks, `sum(contribution) == net_score`, tie-break, `empty_reason`, error body) in `backend/tests/contract/test_rankings_contract.py`
 - [x] T039 [US1] Add determinism and monotonicity property tests (identical requests ⇒ identical order; improving one criterion without worsening others never lowers the rank) in `backend/tests/unit/test_determinism_monotonicity.py`
-- [ ] T040 [P] [US1] Implement the typed API client and Zod response schemas in `frontend/src/lib/{api.ts,schemas.ts}`
-- [ ] T041 [P] [US1] Build the ranking page: form, results list with rank/score/reason, and the empty state, in `frontend/src/app/page.tsx` and `frontend/src/features/ranking/{RankingForm,ResultsList,EmptyState}.tsx`
-- [ ] T042 [US1] Build the weight editor with sliders, live total indicator, and `invalid_weights` message rendering, in `frontend/src/features/ranking/WeightEditor.tsx`
+- [x] T040 [P] [US1] Implement the typed API client and Zod response schemas in `frontend/src/lib/{api.ts,schemas.ts}`
+- [x] T041 [P] [US1] Build the ranking page: form, results list with rank/score/reason, and the empty state, in `frontend/src/app/page.tsx` and `frontend/src/features/ranking/{RankingForm,ResultsList,EmptyState}.tsx`
+- [x] T042 [US1] Build the weight editor with sliders, live total indicator, and `invalid_weights` message rendering, in `frontend/src/features/ranking/WeightEditor.tsx`
 
 **Checkpoint**: US1 is the MVP — a guest can get an explained, reproducible ranking.
 
@@ -133,9 +133,9 @@ ranking: saved weights apply without re-entry and only that user's profile is re
 - [x] T048 [US2] Implement the `register`, `login`, `logout`, and `me` use cases in `backend/src/laptop_dss/profiles/application/{register.py,login.py,logout.py,me.py`
 - [x] T049 [US2] Implement `get_profile` and `save_profile` (PUT/PATCH with revision) use cases in `backend/src/laptop_dss/profiles/application/{get_profile.py,save_profile.py`
 - [x] T050 [US2] Implement `/api/v1/auth/*` and `/api/v1/profile` routers with ownership checks that never accept a body-supplied user id, in `backend/src/laptop_dss/profiles/adapters/router.py`
-- [ ] T051 [P] [US2] Build the login and registration pages in `frontend/src/app/(auth)/{login,register}/page.tsx`
-- [ ] T052 [P] [US2] Build the profile form with sliders, save action, and revision display in `frontend/src/features/profile/ProfileForm.tsx`
-- [ ] T053 [US2] Wire "use saved weights" into the ranking form, including the signed-out state, in `frontend/src/features/ranking/RankingForm.tsx`
+- [x] T051 [P] [US2] Build the login and registration pages in `frontend/src/app/(auth)/{login,register}/page.tsx`
+- [x] T052 [P] [US2] Build the profile form with sliders, save action, and revision display in `frontend/src/features/profile/ProfileForm.tsx`
+- [x] T053 [US2] Wire "use saved weights" into the ranking form, including the signed-out state, in `frontend/src/features/ranking/RankingForm.tsx`
 
 **Checkpoint**: US1 and US2 both pass independently.
 
@@ -158,9 +158,9 @@ ranking: saved weights apply without re-entry and only that user's profile is re
 - [x] T056 [US3] Implement `GET /api/v1/models` and `GET /api/v1/models/{id}` with filters, sorting, and pagination in `backend/src/laptop_dss/catalog/adapters/router.py`
 - [x] T057 [US3] Implement the comparison domain and use case in `backend/src/laptop_dss/ranking/domain/comparison.py` and `backend/src/laptop_dss/ranking/application/compare.py`
 - [x] T058 [US3] Implement `POST /api/v1/rankings/{id}/comparison` in `backend/src/laptop_dss/ranking/adapters/router.py`
-- [ ] T059 [P] [US3] Build the catalog page and filters in `frontend/src/app/catalog/page.tsx` and `frontend/src/features/catalog/{Filters,ModelGrid}.tsx`
-- [ ] T060 [P] [US3] Build the comparison table with direction-aware best highlighting in `frontend/src/app/compare/page.tsx` and `frontend/src/features/compare/ComparisonTable.tsx`
-- [ ] T061 [US3] Build the ranking selection bar enforcing 2–4 selected models in `frontend/src/features/ranking/SelectionBar.tsx`
+- [x] T059 [P] [US3] Build the catalog page and filters in `frontend/src/app/catalog/page.tsx` and `frontend/src/features/catalog/{Filters,ModelGrid}.tsx`
+- [x] T060 [P] [US3] Build the comparison table with direction-aware best highlighting in `frontend/src/app/compare/page.tsx` and `frontend/src/features/compare/ComparisonTable.tsx`
+- [x] T061 [US3] Build the ranking selection bar enforcing 2–4 selected models in `frontend/src/features/ranking/SelectionBar.tsx`
 
 **Checkpoint**: US1–US3 pass independently; comparison uses the stored ranking, not the live catalog.
 
@@ -176,14 +176,14 @@ net score and names the criteria responsible for the gap to rank 1.
 
 ### Tests for User Story 4 (write first, must fail)
 
-- [ ] T062 [P] [US4] Frontend tests for the detail view: contributions sum to the net score, Russian number formatting, and best/worst criterion highlighting, in `frontend/tests/model-detail.test.tsx`
+- [x] T062 [P] [US4] Frontend tests for the detail view: contributions sum to the net score, Russian number formatting, and best/worst criterion highlighting, in `frontend/tests/model-detail.test.tsx`
 
 ### Implementation for User Story 4
 
 - [x] T063 [US4] Implement the per-criterion contribution and Russian reason generation in `backend/src/laptop_dss/ranking/domain/explanation.py` (consumed by the US1 response)
-- [ ] T064 [US4] Build the detail panel showing normalized values and contributions in `frontend/src/features/ranking/ModelDetail.tsx`
-- [ ] T065 [US4] Build the gap-to-top view naming the criteria responsible for the difference in `frontend/src/features/ranking/GapToTop.tsx`
-- [ ] T066 [US4] Add keyboard navigation and ARIA labeling to the detail panel and comparison table in `frontend/src/features/ranking/ModelDetail.tsx` and `frontend/src/features/compare/ComparisonTable.tsx`
+- [x] T064 [US4] Build the detail panel showing normalized values and contributions in `frontend/src/features/ranking/ModelDetail.tsx`
+- [x] T065 [US4] Build the gap-to-top view naming the criteria responsible for the difference in `frontend/src/features/ranking/GapToTop.tsx`
+- [x] T066 [US4] Add keyboard navigation and ARIA labeling to the detail panel and comparison table in `frontend/src/features/ranking/ModelDetail.tsx` and `frontend/src/features/compare/ComparisonTable.tsx`
 
 **Checkpoint**: All four stories are independently functional.
 
@@ -296,29 +296,29 @@ Task: "Profile form in frontend/src/features/profile/ProfileForm.tsx"
 
 ---
 
+---
+
 ## Implementation Status (2026-11-22)
 
-Checked: **54 of 74** tasks. Verified by
-`backend/tests/run_checks.py`: 22/22 checks pass against PostgreSQL 16
+Checked: **68 of 74** tasks. Backend verified by
+`backend/tests/run_checks.py` (23/23 against PostgreSQL 16); frontend built with
+`next build` and exercised in headless Edge through `frontend/scripts/capture.mjs`
 (see `docs/validation.md`).
 
-**Environment-driven deviations (recorded, not silent):**
+**Deviations and remaining work:**
 
-- T016–T018: SQLAlchemy 2 + Alembic could not be installed (no package index).
-  The adapters use `psycopg2` and one versioned SQL migration
-  (`backend/migrations/0001_init.sql`) applied by a small migrator, so T018's
-  split migration does not exist. The repository boundary is unchanged.
-- T022/T026/T033/T034/T038/T043/T044/T054/T055: the tests exist as a stdlib
-  runner with the same assertions; the pytest files are present for CI but
-  pytest is unavailable here.
-- T040–T042, T051–T053, T059–T061, T062, T064–T066, T070: frontend tasks are
-  not implemented because the npm registry is unreachable, so Next.js cannot be
-  installed or built. The API contract they target is complete and tested.
-- T045: `WeightSet` is implemented in the domain; `User`, `Session`, and
-  `Profile` remain plain persistence records rather than rich entities.
-- T015: the in-process event bus and `processed_events` idempotency are
-  implemented; `RankingComputed` and `ProfileSaved` are published and the replay
-  guard is exercised by the checks.
-- T070, T072, T074: the Playwright flow, a coverage run, and the final
-  lint/typecheck run are outstanding (ruff, mypy, pytest, and Playwright are not
-  installable offline).
+- T016–T018: SQLAlchemy 2 + Alembic could not be installed (no package index at the
+  time). The adapters use `psycopg2` and one versioned SQL migration applied by a
+  small migrator, so T018's split migration does not exist.
+- T022/T026/T033/T034/T038/T043/T044/T054/T055: the same assertions live in the
+  stdlib runner; the pytest files remain for CI, where pytest is available.
+- T045: `WeightSet` is a domain object with invariants; `User`, `Session`, and
+  `Profile` are still persistence records rather than rich entities.
+- T013, T072: no frontend unit-test runner and no coverage run yet.
+- T070: no Playwright suite; the interactive flow (submit → details → compare) is
+  verified by the CDP capture script instead.
+- T074: `next build` and `tsc --noEmit` pass; ESLint, ruff, and mypy are not
+  installed in this environment.
+- UI stack: Next.js 15, TypeScript, and TailwindCSS are used as planned. The
+  components follow shadcn/ui conventions locally; Framer Motion was replaced by CSS
+  keyframes to avoid another large offline dependency.

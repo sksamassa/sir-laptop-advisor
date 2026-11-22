@@ -13,8 +13,9 @@ status code, and required field here is present in the generated schema.
   Secure` (Secure omitted only over plain HTTP on `localhost`).
 - Identity is always derived from the cookie. No endpoint accepts a user id.
 - `maintainer` routes require `users.role = 'maintainer'`.
-- Guest callers may call `POST /rankings`; the response is returned immediately and the
-  stored ranking is not addressable by id (no anonymous read).
+- Guest callers may call `POST /rankings`; the stored ranking is then addressable
+  **only** by its unguessable id (a capability), so guests can replay and compare
+  their own result without an account. Account-owned rankings stay owner-only.
 
 ## Errors
 
@@ -52,8 +53,8 @@ All errors use:
 | PATCH | `/profile` | session | Change individual fields or weights |
 | POST | `/rankings` | optional session | Compute a ranking |
 | GET | `/rankings` | session | Ranking history, newest first |
-| GET | `/rankings/{id}` | owner | Replay a stored ranking |
-| POST | `/rankings/{id}/comparison` | owner | Compare 2–4 models from that ranking |
+| GET | `/rankings/{id}` | owner or guest id | Replay a stored ranking |
+| POST | `/rankings/{id}/comparison` | owner or guest id | Compare 2–4 models from that ranking |
 | POST | `/admin/models` | maintainer | Add a model |
 | PATCH | `/admin/models/{id}` | maintainer | Update a model |
 | POST | `/admin/models/{id}/retire` | maintainer | Retire a model |

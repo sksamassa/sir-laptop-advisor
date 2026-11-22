@@ -16,6 +16,7 @@ ok    weight contract: 0.5% input tolerance, exact normalization
 ok    health and criteria endpoints
 ok    catalog listing, filtering, pagination
 ok    guest ranking is ordered, budget-bounded, and explained
+ok    guest ranking is replayable and comparable by its id
 ok    empty budget returns an empty state, not an error
 ok    invalid weights are rejected with 400 invalid_weights
 ok    unknown fields are rejected with 422
@@ -28,8 +29,22 @@ ok    maintainer can add, retire, and republish a model
 ok    logout invalidates the session
 ok    event handlers are idempotent on replay
 
-22 checks passed, 0 failed
+23 checks passed, 0 failed
 ```
+
+## UI validation
+
+- `cd frontend && npx tsc --noEmit` — clean.
+- `npm run build` — 4 routes, prerendered; First Load JS 103–110 kB.
+- Interactive flow in headless Edge over the DevTools protocol
+  (`frontend/scripts/capture.mjs`): submit → 8 ranked cards with Russian reasons →
+  "Почему так?" contribution panel → select 3 → comparison dialog with
+  direction-aware best values. Mobile 390 px checked on `/catalog` and `/`.
+- Screens: `01-form`, `02-results`, `03-details`, `04-selected`, `05-compare`,
+  `06-mobile-catalog` (captured to the temp folder; not committed).
+
+**Not yet validated**: automated browser suite (Playwright), ESLint, and a full
+accessibility audit.
 
 ## Performance (SC-004)
 
