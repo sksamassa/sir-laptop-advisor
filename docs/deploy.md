@@ -138,9 +138,9 @@ cookie must appear as `HttpOnly; Secure; SameSite=Lax` on the Vercel host.
 
 ## Known pitfalls
 
-- **npm lockfile**: `frontend/package-lock.json` is produced by npm 12; Vercel's bundled
-  npm may resolve peer trees differently. If the build fails with
-  `lock file's picomatch@2.3.2 does not satisfy picomatch@4.0.7`, regenerate with
+- **npm lockfile**: `frontend/package-lock.json` is generated in a form both npm 10 (Vercel,
+  GitHub Actions) and npm 12 accept. If a build ever fails with
+  `lock file's picomatch@… does not satisfy picomatch@…`, regenerate it with
   `npx npm@10 install --package-lock-only` and redeploy.
 - **Cold starts**: the Vercel rewrite proxies to the API, so the first request after idle
   pays the API host's cold-start cost. Render free instances sleep; expect a few seconds.
