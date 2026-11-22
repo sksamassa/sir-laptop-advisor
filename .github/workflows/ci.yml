@@ -35,12 +35,17 @@ jobs:
         run: ruff check backend/src backend/tests
       - name: Format check
         run: ruff format --check backend/src backend/tests
+      # Paths are explicit on purpose: the shell glob */domain already matches
+      # shared/domain, and listing it twice makes mypy report a duplicate module.
       - name: Type check (domain and application layers)
         env:
           MYPYPATH: backend/src
         run: >-
           mypy --explicit-package-bases --config-file backend/pyproject.toml
-          backend/src/laptop_dss/*/domain backend/src/laptop_dss/shared/domain
+          backend/src/laptop_dss/catalog/domain
+          backend/src/laptop_dss/profiles/domain
+          backend/src/laptop_dss/ranking/domain
+          backend/src/laptop_dss/shared/domain
       - name: Acceptance checks (unit + API)
         working-directory: backend
         run: python tests/run_checks.py
