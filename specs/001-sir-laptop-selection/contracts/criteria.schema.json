@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://laptop-dss.local/contracts/criteria.schema.json",
+  "title": "Criteria registry (shared/criteria.json)",
+  "description": "Single authored definition of the seven SIR criteria and the controlled vocabularies shared by backend and frontend. Structure is validated by JSON Schema; two invariants are enforced by the loader because JSON Schema cannot express them: criteria keys and order values must be unique and cover 1..7, and every criterion must satisfy 0 <= indifference_threshold < preference_threshold <= 1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "criteria", "vocabularies"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Registry version; bumped when a criterion, direction, unit, or default threshold changes."
+    },
+    "criteria": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "description": "Exactly seven criteria in display order (order 1..7). Adding a criterion requires a registry version bump, a database migration, and regenerated frontend/backend constants.",
+      "items": { "$ref": "#/$defs/criterion" }
+    },
+    "vocabularies": { "$ref": "#/$defs/vocabularies" }
+  },
+  "$defs": {
+    "criterion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "order",
+        "label_ru",
+        "direction",
+        "unit",
+        "storage_field",
+        "indifference_threshold",
+        "preference_threshold",
+        "display_decimals"
+      ],
+      "properties": {
+        "key": {
+          "enum": ["price", "performance", "memory", "weight", "battery", "screen", "warranty"],
+          "description": "Stable API key used in weights, contributions, and the database."
+        },
+        "order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 7,
+          "description": "Display order; must be unique and cover 1..7."
+        },
+        "label_ru": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40,
+          "description": "Russian label shown in the interface."
+        },
+        "direction": {
+          "enum": ["min", "max"],
+          "description": "min: lower is better (price, weight); max: higher is better."
+        },
+        "unit": {
+          "enum": ["RUB", "points", "GB", "g", "minutes", "score_0_10", "months"]
+        },
+        "storage_field": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Column name on device_models holding the raw value."
+        },
+        "indifference_threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "q: normalized difference at or below which alternatives are indifferent. Default 0."
+        },
+        "preference_threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "p: normalized difference at or above which one alternative is strictly preferred. Default 1; must exceed the indifference threshold."
+        },
+        "display_decimals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Decimals used when formatting the raw value in the interface."
+        }
+      }
+    },
+    "vocabularies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["goals", "os", "form_factor"],
+      "properties": {
+        "goals": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "enum": ["study", "development", "design", "gaming"] }
+        },
+        "os": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "enum": ["windows", "macos", "linux"] }
+        },
+        "form_factor": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "enum": ["ultrabook", "laptop", "gaming", "convertible"] }
+        }
+      }
+    }
+  }
+}
