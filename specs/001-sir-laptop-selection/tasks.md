@@ -330,3 +330,17 @@ Checked: **73 of 74** tasks. Verification evidence:
 use `psycopg2` with versioned SQL migrations; pytest was unavailable, so the checks and the
 coverage tracer are stdlib; Framer Motion was replaced by CSS keyframes and the shadcn/ui
 conventions are implemented locally.
+
+---
+
+## Phase 8: Convergence
+
+- [ ] T075 Adopt Alembic for schema migrations, or amend Constitution Principle II to permit the versioned SQL migrator, and record the decision per Constitution II (contradicts)
+- [ ] T076 Move criteria registry file loading out of `backend/src/laptop_dss/catalog/domain/criteria.py` into an adapter, leaving only validation in the domain per Constitution II (contradicts)
+- [ ] T077 Expose the score gap and the criteria responsible for it in the ranking API and the model detail view, using `ranking/domain/explanation.py::gap_to_top` per US4/AC2 (missing)
+- [ ] T078 Run ruff, mypy --strict, and ESLint in CI and fix every reported violation per Constitution III (partial)
+- [ ] T079 Decide and implement how soft preferences (brand, OS, form factor) affect ranking, or document them explicitly as display-only per FR-001 and US1 (partial)
+- [ ] T080 Reconcile the "model lacks a criterion value" edge case with the `NOT NULL` schema: allow incomplete drafts that are excluded and flagged, or remove the edge case per spec edge case (contradicts)
+- [ ] T081 Promote `User`, `Session`, and `Profile` to rich domain entities with their invariants per T045 (partial)
+- [ ] T082 Invalidate or recompute the displayed ranking when budget or weights change after results are shown per spec edge case "changes preferences after viewing results" (partial)
+- [ ] T083 Record the live catalog sources, CSV importer, and guest-capability access in an ADR and plan note per plan decision on catalog maintenance (unrequested)
