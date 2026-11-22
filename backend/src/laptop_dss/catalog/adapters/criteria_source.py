@@ -2,6 +2,14 @@
 
 All file and environment access lives here; the domain only receives the parsed
 mapping through ``parse_registry`` (constitution, Principle II).
+
+Two locations are supported:
+
+- the packaged copy next to the domain module (always present in a container image),
+- the repository's ``shared/criteria.json`` (developer checkouts).
+
+``CRITERIA_PATH`` overrides both. The first existing candidate wins, so the API
+works regardless of whether the working directory is the repository root.
 """
 
 from __future__ import annotations
@@ -12,13 +20,24 @@ from pathlib import Path
 
 from laptop_dss.catalog.domain.criteria import CriteriaRegistry, RegistryError, parse_registry
 
-_REPO_ROOT = Path(__file__).resolve().parents[5]
+_PACKAGE_PATH = Path(__file__).resolve().parents[1] / "domain" / "criteria.json"
+_REPO_PATH = Path(__file__).resolve().parents[5] / "shared" / "criteria.json"
 _registry: CriteriaRegistry | None = None
 
 
-def _default_path() -> Path:
+def _candidates() -> tuple[Path, ...]:
     override = os.environ.get("CRITERIA_PATH")
-    return Path(override) if override else _REPO_ROOT / "shared" / "criteria.json"
+    if override:
+        return (Path(override),)
+    return (_PACKAGE_PATH, _REPO_PATH)
+
+
+def _default_path() -> Path:
+    for candidate in _candidates():
+        if candidate.exists():
+            return candidate
+    tried = ", ".join(str(candidate) for candidate in _candidates())
+    raise RegistryError(f"criteria registry not found; looked in: {tried}")
 
 
 def load_registry(path: Path | None = None) -> CriteriaRegistry:

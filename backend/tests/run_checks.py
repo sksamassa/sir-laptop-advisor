@@ -90,6 +90,14 @@ def _() -> None:
     )
     assert registry.content_hash.startswith("sha256:")
 
+    # The container image has no repository shared/ directory, so the registry
+    # must also exist as packaged data next to the domain module.
+    import laptop_dss.catalog.adapters.criteria_source as criteria_source
+
+    packaged = Path(criteria_source.__file__).resolve().parents[1] / "domain" / "criteria.json"
+    assert packaged.exists(), f"packaged registry missing at {packaged}"
+    assert load_registry(packaged).version == registry.version
+
 
 @check("normalization respects direction and zero range")
 def _() -> None:

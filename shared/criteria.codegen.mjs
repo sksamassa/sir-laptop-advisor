@@ -13,6 +13,9 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const source = join(root, "shared", "criteria.json");
 const tsTarget = join(root, "frontend", "src", "generated", "criteria.generated.ts");
 const pyTarget = join(root, "backend", "src", "laptop_dss", "catalog", "domain", "criteria_generated.py");
+// Packaged copy so the API can load the registry inside a container, where the
+// repository's shared/ directory is not part of the image.
+const jsonTarget = join(root, "backend", "src", "laptop_dss", "catalog", "domain", "criteria.json");
 const check = process.argv.includes("--check");
 
 const registry = JSON.parse(readFileSync(source, "utf8"));
@@ -80,4 +83,5 @@ function emit(path, content) {
 
 emit(tsTarget, ts);
 emit(pyTarget, py);
+emit(jsonTarget, `${JSON.stringify(registry, null, 2)}\n`);
 if (check && !process.exitCode) console.log("generated files are up to date");
