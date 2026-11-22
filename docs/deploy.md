@@ -83,6 +83,9 @@ python -c "from laptop_dss.main import seed_demo; seed_demo()"
 Migrations run automatically at startup (`0001_init.sql`, `0002_catalog_provenance.sql`);
 the logs show `applied migrations: …` on first boot.
 
+The container binds `${PORT}` (Render sets it, default 10000) and falls back to 8000
+locally, so no manual port mapping is needed.
+
 ### Cold starts and the Vercel proxy
 
 Render's free web service sleeps after ~15 minutes idle. Waking it takes 30–50 seconds,

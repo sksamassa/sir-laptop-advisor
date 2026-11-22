@@ -13,4 +13,5 @@ COPY migrations ./migrations
 COPY src ./src
 
 EXPOSE 8000
-CMD ["uvicorn", "laptop_dss.main:app", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "/app/src"]
+# Render (and most PaaS hosts) inject PORT; honour it, falling back to 8000 locally.
+CMD ["sh", "-c", "exec uvicorn laptop_dss.main:app --host 0.0.0.0 --port \"${PORT:-8000}\" --app-dir /app/src"]
