@@ -137,6 +137,7 @@ def create_app() -> FastAPI:
         applied = db.migrate()
         if applied:
             logger.info("applied migrations: %s", ", ".join(applied))
+        logger.info("database target: %s", db.describe_target())
         # Load the registry at boot: a missing or invalid criteria file must fail the
         # deploy instead of surfacing as a 500 on the first ranking request.
         registry = load_registry()

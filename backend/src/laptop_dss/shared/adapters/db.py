@@ -13,6 +13,7 @@ from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import psycopg2
 from psycopg2.extras import RealDictCursor, register_uuid
@@ -26,6 +27,17 @@ _pool: ThreadedConnectionPool | None = None
 
 def _dsn() -> str:
     return os.environ.get("DATABASE_URL", "postgresql://dss@127.0.0.1:5433/laptop_dss")
+
+
+def describe_target(dsn: str | None = None) -> str:
+    """Host and database name of the active DSN, with credentials stripped.
+
+    Printed at startup and by the seed script so it is obvious which database a
+    process is actually talking to (two databases are easy to confuse on a PaaS).
+    """
+    parsed = urlparse(dsn or _dsn())
+    database = (parsed.path or "").lstrip("/") or "?"
+    return f"{parsed.hostname or '?'}:{parsed.port or 5432}/{database}"
 
 
 def get_pool() -> ThreadedConnectionPool:
