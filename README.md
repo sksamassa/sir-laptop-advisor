@@ -1,4 +1,4 @@
-﻿# Laptop Selection DSS — SIR service
+# Laptop Selection DSS — SIR service
 
 Сервис поддержки принятия решений для выбора ноутбука методом SIR
 (Superiority and Inferiority Ranking) по семи критериям, с объяснением каждого
@@ -16,7 +16,7 @@ API contract, tasks).
 | Backend API: catalog, auth, profiles, rankings, replay, comparison, admin | Implemented |
 | PostgreSQL schema + versioned SQL migrations | Implemented (`backend/migrations`) |
 | In-process event bus with idempotent replay (`processed_events`) | Implemented |
-| Executable acceptance checks (26, incl. HTTP against PostgreSQL) | **Passing** (see `docs/validation.md`) |
+| Executable acceptance checks (27, incl. HTTP against PostgreSQL) | **Passing** (see `docs/validation.md`) |
 | Catalog | 36 models, **15 990 – 199 990 ₽**, indicative retail snapshot |
 | Domain statement coverage | **96.3%** (gate 80%) via `make coverage` |
 | Browser tests | **4/4** Playwright scenarios on system Edge (`make e2e`) |
@@ -74,7 +74,7 @@ if any row failed.
 ## Verify
 
 ```bash
-make test        # 25 acceptance checks; needs a reachable PostgreSQL
+make test        # 27 acceptance checks; needs a reachable PostgreSQL
 make test-unit   # SIR kernel checks only; no database required
 make coverage    # domain statement coverage (stdlib tracer)
 make e2e         # Playwright against the running UI
