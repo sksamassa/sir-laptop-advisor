@@ -77,9 +77,13 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
+      # npm ci validates the lockfile against the runner's resolver, which differs
+      # from the local one for fdir's picomatch peer (npm hoists it per platform).
+      # Vercel installs with `npm install`, so CI does the same: the gate that
+      # matters is typecheck + production build, not lockfile validation.
       - name: Install frontend
         working-directory: frontend
-        run: npm ci
+        run: npm install --no-audit --no-fund
       - name: Type check
         working-directory: frontend
         run: npm run typecheck

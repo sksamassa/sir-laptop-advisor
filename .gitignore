@@ -46,3 +46,6 @@ htmlcov/
 backend/build/
 backend/*.egg-info/
 
+.npm10/
+.npm10old/
+
