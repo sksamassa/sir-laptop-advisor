@@ -6,9 +6,8 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-COPY pyproject.toml ./
-RUN pip install --no-cache-dir fastapi "uvicorn[standard]" "pydantic>=2.7" \
-    "psycopg2-binary" "argon2-cffi" "numpy>=1.26"
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY migrations ./migrations
 COPY src ./src
