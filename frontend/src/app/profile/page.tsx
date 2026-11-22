@@ -42,6 +42,7 @@ export default function ProfilePage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
+  const passwordTooShort = mode === "register" && password.length > 0 && password.length < 12;
 
   useEffect(() => {
     me()
@@ -179,18 +180,31 @@ export default function ProfilePage() {
                 className="field"
                 type="password"
                 autoComplete={mode === "login" ? "current-password" : "new-password"}
+                minLength={mode === "register" ? 12 : undefined}
+                aria-invalid={passwordTooShort || undefined}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
               />
               {mode === "register" ? (
-                <p className="mt-1 text-xs text-[#8f96bd]">Не менее 12 символов</p>
+                <p
+                  className={`mt-1 text-xs ${passwordTooShort ? "text-[#ff9ea8]" : "text-[#8f96bd]"}`}
+                >
+                  {passwordTooShort
+                    ? `Ещё ${12 - password.length} — пароль должен быть не короче 12 символов`
+                    : "Не менее 12 символов"}
+                </p>
               ) : null}
             </div>
             {error ? <ErrorNote>{error}</ErrorNote> : null}
             <button
               type="button"
               className="btn btn-primary w-full"
-              disabled={authBusy || email.length < 3 || password.length < 1}
+              disabled={
+                authBusy ||
+                email.length < 3 ||
+                password.length < 1 ||
+                (mode === "register" && password.length < 12)
+              }
               onClick={submitAuth}
             >
               {authBusy ? "Подождите…" : mode === "login" ? "Войти" : "Создать аккаунт"}

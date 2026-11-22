@@ -132,6 +132,30 @@ export class ApiError extends Error {
   }
 }
 
+interface ValidationIssue {
+  loc?: (string | number)[];
+  msg?: string;
+  type?: string;
+}
+
+/** Turn FastAPI's English validation array into a message a student can act on. */
+function describeValidation(issues: ValidationIssue[]): string | undefined {
+  for (const issue of issues) {
+    const field = String(issue.loc?.at(-1) ?? "");
+    const msg = issue.msg ?? "";
+    if (field === "password") {
+      const minimum = /at least (\d+)/i.exec(msg)?.[1];
+      return minimum
+        ? `Пароль должен быть не короче ${minimum} символов`
+        : "Пароль не соответствует требованиям";
+    }
+    if (field === "email") {
+      return "Введите корректный адрес электронной почты";
+    }
+  }
+  return issues[0]?.msg;
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, {
     ...init,
@@ -142,11 +166,18 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const text = await response.text();
   const body = text ? (JSON.parse(text) as unknown) : null;
   if (!response.ok) {
-    const error = (body as { error?: { message?: string; code?: string } } | null)?.error;
+    const payload = body as
+      | { error?: { message?: string; code?: string }; detail?: ValidationIssue[] | string }
+      | null;
+    const detailMessage = Array.isArray(payload?.detail)
+      ? describeValidation(payload.detail)
+      : typeof payload?.detail === "string"
+        ? payload.detail
+        : undefined;
     throw new ApiError(
-      error?.message ?? `Ошибка запроса (${response.status})`,
+      payload?.error?.message ?? detailMessage ?? `Ошибка запроса (${response.status})`,
       response.status,
-      error?.code ?? "unknown",
+      payload?.error?.code ?? "unknown",
     );
   }
   return body as T;
