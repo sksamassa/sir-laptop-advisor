@@ -235,6 +235,8 @@ def _() -> None:
 @check("health and criteria endpoints")
 def _() -> None:
     assert client.get("/api/v1/health").json()["status"] == "ok"
+    landing = client.get("/").json()
+    assert landing["health"] == "/api/v1/health"
     payload = client.get("/api/v1/criteria").json()
     assert len(payload["criteria"]) == 7
     assert payload["criteria"][0]["label_ru"] == "Цена"

@@ -15,6 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from laptop_dss.api.routes import router
+from laptop_dss.catalog.adapters.criteria_source import load_registry
 from laptop_dss.config import load_settings
 from laptop_dss.profiles.adapters import auth
 from laptop_dss.shared.adapters import db
@@ -121,11 +122,29 @@ def create_app() -> FastAPI:
             },
         )
 
+    @app.get("/", include_in_schema=False)
+    def root() -> dict[str, str]:
+        """Friendly landing so the platform's root probe is not a bare 404."""
+        return {
+            "service": "SIR laptop advisor API",
+            "version": "0.1.0",
+            "docs": "/docs",
+            "health": "/api/v1/health",
+        }
+
     @app.on_event("startup")
     def on_startup() -> None:
         applied = db.migrate()
         if applied:
             logger.info("applied migrations: %s", ", ".join(applied))
+        # Load the registry at boot: a missing or invalid criteria file must fail the
+        # deploy instead of surfacing as a 500 on the first ranking request.
+        registry = load_registry()
+        logger.info(
+            "criteria registry ready: version=%s hash=%s",
+            registry.version,
+            registry.content_hash,
+        )
 
     app.include_router(router)
     return app
