@@ -81,6 +81,9 @@ feed you are allowed to read; CSV is the offline fallback.
 
 ## Deploy
 
+**Live:** [sir-laptop-advisor.vercel.app](https://sir-laptop-advisor.vercel.app) ·
+API health: [sir-laptop-advisor-api.onrender.com/api/v1/health](https://sir-laptop-advisor-api.onrender.com/api/v1/health)
+
 Vercel hosts the Next.js UI; the FastAPI service runs on a long-lived host (Render) with
 managed PostgreSQL (Neon). Environment variables, steps, and pitfalls:
 [docs/deploy.md](docs/deploy.md).
