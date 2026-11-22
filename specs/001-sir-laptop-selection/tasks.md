@@ -1,4 +1,4 @@
-﻿---
+---
 
 description: "Task list for the SIR-Based Laptop Selection Service"
 ---
@@ -334,6 +334,10 @@ conventions are implemented locally.
 ---
 
 ## Phase 8: Convergence
+
+> Appended by `/speckit-converge` after the implementation run. These nine tasks close the
+> remaining gaps; the status summary above predates this phase and still counts 74 tasks.
+> CRITICAL items T075–T076 are constitution debts, not feature regressions.
 
 - [ ] T075 Adopt Alembic for schema migrations, or amend Constitution Principle II to permit the versioned SQL migrator, and record the decision per Constitution II (contradicts)
 - [ ] T076 Move criteria registry file loading out of `backend/src/laptop_dss/catalog/domain/criteria.py` into an adapter, leaving only validation in the domain per Constitution II (contradicts)
