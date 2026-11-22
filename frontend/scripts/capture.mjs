@@ -125,6 +125,21 @@ console.log("compare opened:", openedCompare);
 await wait(3000);
 await shot("05-compare");
 
+await send("Page.navigate", { url: "http://127.0.0.1:3000/" });
+await wait(4000);
+await evaluate(`
+  (() => {
+    const link = [...document.querySelectorAll("nav a")].find(
+      (node) => node.textContent.trim() === "Войти",
+    );
+    if (!link) return false;
+    link.click();
+    return true;
+  })()
+`);
+await wait(3000);
+await shot("10-login");
+
 await send("Emulation.setDeviceMetricsOverride", {
   width: 390,
   height: 900,

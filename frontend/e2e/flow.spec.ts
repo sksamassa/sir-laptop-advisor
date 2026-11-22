@@ -4,6 +4,11 @@ test.describe("SIR laptop selection", () => {
   test("a guest receives a ranked, explained shortlist", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { name: /Ноутбук/ })).toBeVisible();
+    const nav = page.getByRole("navigation", { name: "Основная навигация" });
+    await expect(nav.getByRole("link", { name: "Подбор", exact: true })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
 
     await page.getByRole("button", { name: "Подобрать ноутбук" }).click();
     await expect(page.getByText(/Найдено моделей/)).toBeVisible({ timeout: 25_000 });
@@ -40,6 +45,11 @@ test.describe("SIR laptop selection", () => {
   test("catalog lists models and filters by operating system", async ({ page }) => {
     await page.goto("/catalog");
     await expect(page.getByRole("heading", { name: /Каталог моделей/ })).toBeVisible();
+    const nav = page.getByRole("navigation", { name: "Основная навигация" });
+    await expect(nav.getByRole("link", { name: "Каталог", exact: true })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
     await expect(page.getByText(/Источник:/)).toBeVisible({ timeout: 20_000 });
 
     const cards = page.locator("article");
@@ -53,9 +63,14 @@ test.describe("SIR laptop selection", () => {
     await expect(cards.first().getByText("macOS")).toBeVisible();
   });
 
-  test("profile asks for sign-in when anonymous", async ({ page }) => {
-    await page.goto("/profile");
-    await expect(page.getByRole("button", { name: "Войти" })).toBeVisible({ timeout: 15_000 });
+  test("a guest reaches login through the header link", async ({ page }) => {
+    await page.goto("/");
+    const loginLink = page.getByRole("link", { name: "Войти" });
+    await expect(loginLink).toBeVisible({ timeout: 15_000 });
+    await loginLink.click();
+
+    await expect(page).toHaveURL(/\/profile$/);
+    await expect(page.getByRole("button", { name: "Войти" })).toBeVisible();
     await expect(page.getByLabel("Электронная почта")).toBeVisible();
     await expect(page.getByLabel("Пароль")).toBeVisible();
   });

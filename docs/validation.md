@@ -46,10 +46,11 @@ ok    event handlers are idempotent on replay
   "Почему так?" contribution panel → select 3 → comparison dialog with
   direction-aware best values. Mobile 390 px checked on `/catalog` and `/`.
 - Screens: `01-form`, `02-results`, `03-details`, `04-selected`, `05-compare`,
-  `06-mobile-catalog`, `07-budget-30000`, `08-budget-20000`, `09-budget-10000`.
-  The last three prove the market-range fix: 30 000 ₽ and 20 000 ₽ both return
-  ranked laptops (the catalog now starts at 15 990 ₽), and 10 000 ₽ explains that
-  the cheapest model is 15 990 ₽.
+  `06-mobile-catalog`, `07-budget-30000`, `08-budget-20000`, `09-budget-10000`,
+  `10-login`. The header highlights the active section (`aria-current`), exposes a
+  "Войти" link for guests, and the budget screens show that 30 000 ₽ and 20 000 ₽
+  both return ranked laptops (the catalog starts at 15 990 ₽), while 10 000 ₽ explains
+  that the cheapest model is 15 990 ₽.
 
 **Not yet validated**: ESLint and a full accessibility audit.
 
