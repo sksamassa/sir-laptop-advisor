@@ -145,6 +145,16 @@ def create_app() -> FastAPI:
             registry.version,
             registry.content_hash,
         )
+        # PaaS free tiers often have no shell, so allow a one-time bootstrap:
+        # SEED_IF_EMPTY=1 seeds only when the catalog is empty.
+        if os.environ.get("SEED_IF_EMPTY") == "1":
+            from laptop_dss.catalog.adapters import repository as catalog_repo
+
+            if catalog_repo.count() == 0:
+                logger.info("catalog is empty; seeding demo data")
+                logger.info("seed result: %s", seed_demo())
+            else:
+                logger.info("catalog already populated; SEED_IF_EMPTY skipped")
 
     app.include_router(router)
     return app
@@ -163,7 +173,12 @@ def seed_demo() -> dict[str, Any]:
 
     inserted = catalog_repo.seed(DEMO_MODELS)
     email = os.environ.get("SEED_ADMIN_EMAIL", "admin@example.com")
-    password = os.environ.get("SEED_ADMIN_PASSWORD", "admin-password-12")
+    configured = os.environ.get("SEED_ADMIN_PASSWORD")
+    if not configured:
+        logger.warning(
+            "SEED_ADMIN_PASSWORD is not set; the maintainer account uses the demo password"
+        )
+    password = configured or "admin-password-12"
     created_admin = False
     if profiles_repo.find_user_by_email(email) is None:
         profiles_repo.create_user(email, auth.hash_password(password), role="maintainer")

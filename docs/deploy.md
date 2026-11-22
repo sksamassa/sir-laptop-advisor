@@ -74,11 +74,30 @@ URL**, and add the environment variables below to the web service.
 | `CORS_ORIGINS` | `https://<your-app>.vercel.app` (only needed for direct API calls) |
 | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | demo maintainer; set a real password |
 
-Seed once from the Render *Shell* tab:
+Seed once, from the Render *Shell* tab (Starter plan and above):
 
 ```bash
 python -c "from laptop_dss.main import seed_demo; seed_demo()"
 ```
+
+Render's **free** plan has no shell. Use either of these instead:
+
+- **Self-seed on boot** (recommended): set `SEED_IF_EMPTY=1` together with the
+  `SEED_ADMIN_*` variables, then redeploy. The service seeds only when the catalog is
+  empty and logs `catalog is empty; seeding demo data`. Remove the flag afterwards so an
+  intentionally emptied catalog is not repopulated.
+- **Seed from your machine** against the same database:
+
+  ```powershell
+  $env:DATABASE_URL = "postgresql://…neon…?sslmode=require"
+  $env:SEED_ADMIN_EMAIL = "you@example.com"
+  $env:SEED_ADMIN_PASSWORD = "a-strong-password"
+  $env:PYTHONPATH = "backend/src"
+  python -c "from laptop_dss.main import seed_demo; print(seed_demo())"
+  ```
+
+  Both paths are idempotent: re-running updates prices by `(brand, model_name)` and never
+  duplicates rows.
 
 Migrations run automatically at startup (`0001_init.sql`, `0002_catalog_provenance.sql`);
 the logs show `applied migrations: …` on first boot.
