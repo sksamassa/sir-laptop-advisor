@@ -135,5 +135,49 @@ await send("Page.navigate", { url: "http://127.0.0.1:3000/catalog" });
 await wait(5000);
 await shot("06-mobile-catalog");
 
+await send("Emulation.setDeviceMetricsOverride", {
+  width: 1440,
+  height: 1100,
+  deviceScaleFactor: 1,
+  mobile: false,
+});
+await send("Page.navigate", { url: "http://127.0.0.1:3000/" });
+await wait(5000);
+
+const setBudget = async (rubles) => {
+  await evaluate(`
+    (() => {
+      const input = document.querySelector('input[aria-label="Бюджет в рублях"]');
+      if (!input) return false;
+      const setter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype,
+        "value",
+      ).set;
+      setter.call(input, String(${rubles}));
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      return true;
+    })()
+  `);
+  await wait(400);
+  await evaluate(`
+    (() => {
+      const button = [...document.querySelectorAll("button")].find((node) =>
+        node.textContent.includes("Подобрать ноутбук"),
+      );
+      if (!button) return false;
+      button.click();
+      return true;
+    })()
+  `);
+  await wait(4000);
+};
+
+await setBudget(30000);
+await shot("07-budget-30000");
+
+await setBudget(10000);
+await shot("08-budget-10000");
+
+
 ws.close();
 process.exit(0);

@@ -16,7 +16,7 @@ API contract, tasks).
 | Backend API: catalog, auth, profiles, rankings, replay, comparison, admin | Implemented |
 | PostgreSQL schema + versioned SQL migrations | Implemented (`backend/migrations`) |
 | In-process event bus with idempotent replay (`processed_events`) | Implemented |
-| Executable acceptance checks (24, incl. HTTP against PostgreSQL) | **Passing** (see `docs/validation.md`) |
+| Executable acceptance checks (25, incl. HTTP against PostgreSQL) | **Passing** (see `docs/validation.md`) |
 | Domain statement coverage | **96.3%** (gate 80%) via `make coverage` |
 | Browser tests | **4/4** Playwright scenarios on system Edge (`make e2e`) |
 | Performance: 5 000 models ranked in ~220 ms (p95 261 ms) | **Passing** (`backend/tests/perf/`) |
@@ -56,7 +56,7 @@ Demo maintainer comes from `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`
 ## Verify
 
 ```bash
-make test        # 24 acceptance checks; needs a reachable PostgreSQL
+make test        # 25 acceptance checks; needs a reachable PostgreSQL
 make test-unit   # SIR kernel checks only; no database required
 make coverage    # domain statement coverage (stdlib tracer)
 make e2e         # Playwright against the running UI

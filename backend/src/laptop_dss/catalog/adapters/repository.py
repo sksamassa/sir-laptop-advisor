@@ -166,6 +166,16 @@ def count() -> int:
     return int(row["total"]) if row else 0
 
 
+def cheapest_active_price() -> int | None:
+    """Lowest price among active models; used to explain an empty budget."""
+    row = db.fetch_one(
+        "SELECT min(price_minor) AS price FROM device_models WHERE status = 'active'"
+    )
+    if row is None or row["price"] is None:
+        return None
+    return int(row["price"])
+
+
 def seed(models: list[dict[str, Any]]) -> int:
     """Insert seed models idempotently by (brand, model_name)."""
     inserted = 0

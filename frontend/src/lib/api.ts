@@ -61,6 +61,7 @@ export interface RankingResponse {
   candidate_count: number;
   items: RankingItem[];
   empty_reason?: string;
+  cheapest_price_minor?: number | null;
 }
 
 export interface ComparisonModel {

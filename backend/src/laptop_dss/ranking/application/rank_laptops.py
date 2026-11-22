@@ -97,6 +97,7 @@ def create_ranking(
             "candidate_count": 0,
             "items": [],
             "empty_reason": "budget_too_low",
+            "cheapest_price_minor": catalog_repo.cheapest_active_price(),
         }
 
     result = sir_rank(eligible, chosen.values, registry)

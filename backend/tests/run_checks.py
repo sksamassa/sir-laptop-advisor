@@ -42,6 +42,7 @@ _API_CHECKS = {
     "guest ranking is ordered, budget-bounded, and explained",
     "guest ranking is replayable and comparable by its id",
     "empty budget returns an empty state, not an error",
+    "a student budget of 30 000 RUB finds affordable models",
     "invalid weights are rejected with 400 invalid_weights",
     "unknown fields are rejected with 422",
     "register, login, profile save, and partial weight change",
@@ -282,6 +283,21 @@ def _() -> None:
     assert payload["candidate_count"] == 0
     assert payload["items"] == []
     assert payload["empty_reason"] == "budget_too_low"
+    cheapest = client.get(
+        "/api/v1/models", params={"page_size": 1, "sort": "price_asc"}
+    ).json()["items"][0]["price_minor"]
+    assert payload["cheapest_price_minor"] == cheapest, "the empty state must name a real price"
+
+
+@check("a student budget of 30 000 RUB finds affordable models")
+def _() -> None:
+    payload = client.post(
+        "/api/v1/rankings", json={"budget_minor": 30_000_00, "goals": ["study"]}
+    ).json()
+    assert payload["candidate_count"] >= 1, payload
+    assert all(item["model"]["price_minor"] <= 30_000_00 for item in payload["items"])
+    assert payload["items"][0]["rank"] == 1
+    assert payload["items"][0]["reason"]
 
 
 @check("invalid weights are rejected with 400 invalid_weights")

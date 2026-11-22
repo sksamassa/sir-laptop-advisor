@@ -22,6 +22,7 @@ export function ResultsList({
   const [expanded, setExpanded] = useState<string | null>(null);
 
   if (result.items.length === 0) {
+    const cheapest = result.cheapest_price_minor;
     return (
       <div className="card p-8 text-center">
         <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-white/5 text-xl">
@@ -29,9 +30,16 @@ export function ResultsList({
         </div>
         <h3 className="text-base font-semibold text-white">Подходящих моделей нет</h3>
         <p className="mx-auto mt-2 max-w-md text-sm text-[#8f96bd]">
-          {result.empty_reason === "budget_too_low"
-            ? "В каталоге пока нет моделей в этом бюджете. Увеличьте бюджет или ослабьте фильтры — и мы пересчитаем рейтинг."
-            : "Попробуйте изменить бюджет или критерии."}
+          {result.empty_reason === "budget_too_low" ? (
+            <>
+              {cheapest
+                ? `В каталоге нет моделей до этой суммы. Самая доступная — ${formatRub(cheapest)}.`
+                : "В каталоге пока нет моделей в этом бюджете."}{" "}
+              Увеличьте бюджет или ослабьте фильтры — и мы пересчитаем рейтинг.
+            </>
+          ) : (
+            "Попробуйте изменить бюджет или критерии."
+          )}
         </p>
       </div>
     );

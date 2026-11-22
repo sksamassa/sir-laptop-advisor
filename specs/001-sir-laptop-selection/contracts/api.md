@@ -123,7 +123,9 @@ Contract rules:
 3. `contributions` always contains exactly the seven criterion keys and
    `sum(contribution) == net_score` within `1e-6`.
 4. `candidate_count == 0` returns `201` with `items: []` and an `empty_reason` string
-   (for example `budget_too_low`), never a `4xx`.
+   (for example `budget_too_low`), never a `4xx`. It also carries
+   `cheapest_price_minor`: the lowest active catalog price (or `null` when the catalog
+   is empty), so the interface can tell the shopper what budget would find something.
 5. Weights outside the allowed tolerance return `400 invalid_weights` before any ranking.
 
 ### `GET /rankings/{id}`

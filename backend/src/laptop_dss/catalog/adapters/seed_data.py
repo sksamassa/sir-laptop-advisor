@@ -75,4 +75,35 @@ DEMO_MODELS: list[dict[str, object]] = [
         "cpu_score": 11_500, "ram_gb": 18, "weight_g": 1_600, "battery_minutes": 1_020,
         "screen_score": 9.6, "warranty_months": 12,
     },
+    # Budget segment: keeps the 25–50k RUB range meaningful for students.
+    {
+        "brand": "Honor", "model_name": "MagicBook X 14", "slug": "honor-magicbook-x-14",
+        "os": "windows", "form_factor": "laptop", "price_minor": 24_990_00,
+        "cpu_score": 3_100, "ram_gb": 8, "weight_g": 1_380, "battery_minutes": 420,
+        "screen_score": 5.8, "warranty_months": 12,
+    },
+    {
+        "brand": "Acer", "model_name": "Aspire 3", "slug": "acer-aspire-3",
+        "os": "windows", "form_factor": "laptop", "price_minor": 29_990_00,
+        "cpu_score": 3_600, "ram_gb": 8, "weight_g": 1_900, "battery_minutes": 360,
+        "screen_score": 5.5, "warranty_months": 12,
+    },
+    {
+        "brand": "Xiaomi", "model_name": "RedmiBook 14", "slug": "xiaomi-redmibook-14",
+        "os": "windows", "form_factor": "laptop", "price_minor": 32_990_00,
+        "cpu_score": 3_900, "ram_gb": 8, "weight_g": 1_450, "battery_minutes": 450,
+        "screen_score": 6.2, "warranty_months": 12,
+    },
+    {
+        "brand": "Lenovo", "model_name": "V15 G4", "slug": "lenovo-v15-g4",
+        "os": "windows", "form_factor": "laptop", "price_minor": 36_990_00,
+        "cpu_score": 4_100, "ram_gb": 16, "weight_g": 1_700, "battery_minutes": 390,
+        "screen_score": 5.9, "warranty_months": 12,
+    },
+    {
+        "brand": "ASUS", "model_name": "VivoBook 15", "slug": "asus-vivobook-15",
+        "os": "windows", "form_factor": "laptop", "price_minor": 44_990_00,
+        "cpu_score": 4_600, "ram_gb": 16, "weight_g": 1_690, "battery_minutes": 450,
+        "screen_score": 6.4, "warranty_months": 24,
+    },
 ]

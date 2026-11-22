@@ -18,6 +18,7 @@ ok    catalog listing, filtering, pagination
 ok    guest ranking is ordered, budget-bounded, and explained
 ok    guest ranking is replayable and comparable by its id
 ok    empty budget returns an empty state, not an error
+ok    a student budget of 30 000 RUB finds affordable models
 ok    invalid weights are rejected with 400 invalid_weights
 ok    unknown fields are rejected with 422
 ok    register, login, profile save, and partial weight change
@@ -30,7 +31,7 @@ ok    logout invalidates the session
 ok    domain validation and error branches
 ok    event handlers are idempotent on replay
 
-24 checks passed, 0 failed
+25 checks passed, 0 failed
 ```
 
 ## UI validation
@@ -42,7 +43,9 @@ ok    event handlers are idempotent on replay
   "Почему так?" contribution panel → select 3 → comparison dialog with
   direction-aware best values. Mobile 390 px checked on `/catalog` and `/`.
 - Screens: `01-form`, `02-results`, `03-details`, `04-selected`, `05-compare`,
-  `06-mobile-catalog` (captured to the temp folder; not committed).
+  `06-mobile-catalog`, `07-budget-30000`, `08-budget-10000` (the last two prove the
+  budget-segment fix: a 30 000 ₽ budget now returns two models, and a 10 000 ₽
+  budget names the cheapest available price).
 
 **Not yet validated**: ESLint and a full accessibility audit.
 
