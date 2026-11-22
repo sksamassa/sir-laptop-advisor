@@ -56,5 +56,5 @@ def random_models(count: int, seed: int) -> list[DeviceModel]:
     ]
 
 
-def uniform_weights(registry) -> dict[str, float]:  # noqa: ANN001
+def uniform_weights(registry) -> dict[str, float]:
     return {key: 1.0 / len(registry.keys) for key in registry.keys}

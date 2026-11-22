@@ -18,10 +18,11 @@ import re
 import urllib.error
 import urllib.request
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Callable, Protocol
+from typing import Any, Protocol
 
 from laptop_dss.catalog.adapters import repository as repo
 from laptop_dss.catalog.adapters.criteria_source import load_registry
@@ -124,9 +125,7 @@ class JsonEndpointSource:
         return [self._row(item) for item in items if isinstance(item, dict)]
 
     def _row(self, item: dict[str, Any]) -> RawRow:
-        values = {
-            field: self._dig(item, path) for field, path in self.field_map.items()
-        }
+        values = {field: self._dig(item, path) for field, path in self.field_map.items()}
         required = {"brand", "model_name", "price_rub"}
         missing = [field for field in required if values.get(field) in (None, "")]
         if missing:
@@ -156,7 +155,9 @@ class HtmlPageSource:
     "model_name": ".title", "price_rub": {"selector": ".price", "regex": "[0-9 ]+"}}}
     """
 
-    def __init__(self, config: dict[str, Any], *, fetch_html: Callable[[str], str] | None = None) -> None:
+    def __init__(
+        self, config: dict[str, Any], *, fetch_html: Callable[[str], str] | None = None
+    ) -> None:
         self.url = str(config["url"])
         self.item = str(config["item"])
         self.fields: dict[str, Any] = dict(config.get("fields", {}))
@@ -225,8 +226,17 @@ class CsvSource:
     """A CSV export, used as the offline fallback."""
 
     REQUIRED = (
-        "brand", "model_name", "os", "form_factor", "price_rub", "cpu_score",
-        "ram_gb", "weight_g", "battery_minutes", "screen_score", "warranty_months",
+        "brand",
+        "model_name",
+        "os",
+        "form_factor",
+        "price_rub",
+        "cpu_score",
+        "ram_gb",
+        "weight_g",
+        "battery_minutes",
+        "screen_score",
+        "warranty_months",
     )
 
     def __init__(self, path: Path) -> None:
@@ -276,7 +286,7 @@ def apply_rows(rows: list[RawRow], *, source: str) -> dict[str, Any]:
                 "model_name": row.model_name,
                 "os": row.os,
                 "form_factor": row.form_factor,
-                "price_minor": int(round(row.price_rub * 100)),
+                "price_minor": round(row.price_rub * 100),
                 "cpu_score": int(row.cpu_score),
                 "ram_gb": int(row.ram_gb),
                 "weight_g": int(row.weight_g),
@@ -380,14 +390,17 @@ def main(argv: list[str]) -> int:
             )
         )
     if args.html_config:
-        sources.append(HtmlPageSource(json.loads(Path(args.html_config).read_text(encoding="utf-8"))))
+        sources.append(
+            HtmlPageSource(json.loads(Path(args.html_config).read_text(encoding="utf-8")))
+        )
     if args.csv:
         sources.append(CsvSource(Path(args.csv)))
     sources = sources or configured_sources()
 
     if not sources:
         print(
-            "no source configured: pass --live-url/--csv, or set CATALOG_LIVE_URL / CATALOG_CSV_PATH",
+            "no source configured: pass --live-url/--csv, or set "
+            "CATALOG_LIVE_URL / CATALOG_CSV_PATH",
             file=sys.stderr,
         )
         return 2

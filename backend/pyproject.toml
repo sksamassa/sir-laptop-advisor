@@ -28,6 +28,9 @@ dev = [
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
@@ -38,7 +41,9 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
-ignore = ["B008"]
+# RUF001/RUF003 flag Cyrillic letters as "ambiguous" — intentional in a
+# Russian-language product (UI strings, error messages, docs).
+ignore = ["B008", "RUF001", "RUF003"]
 
 [tool.mypy]
 python_version = "3.12"
@@ -49,7 +54,7 @@ files = ["src/laptop_dss/profiles/domain", "src/laptop_dss/catalog/domain", "src
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["src", "."]
 filterwarnings = ["error::DeprecationWarning:laptop_dss.*"]
 
 [tool.coverage.run]

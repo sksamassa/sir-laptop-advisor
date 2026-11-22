@@ -24,6 +24,7 @@ os.environ["RATE_LIMIT_DISABLED"] = "1"
 
 from fastapi.testclient import TestClient  # noqa: E402
 
+from helpers import make_model, random_models, uniform_weights  # noqa: E402
 from laptop_dss.catalog.adapters.criteria_source import load_registry  # noqa: E402
 from laptop_dss.main import app, seed_demo  # noqa: E402
 from laptop_dss.profiles.domain.weights import WeightSet  # noqa: E402
@@ -32,7 +33,6 @@ from laptop_dss.ranking.domain import sir_reference  # noqa: E402
 from laptop_dss.ranking.domain.normalization import normalize  # noqa: E402
 from laptop_dss.ranking.domain.preference import preference  # noqa: E402
 from laptop_dss.shared.adapters import db  # noqa: E402
-from helpers import make_model, random_models, uniform_weights  # noqa: E402
 
 CHECKS: list[tuple[str, object]] = []
 CTX: dict[str, object] = {}
@@ -59,8 +59,8 @@ _API_CHECKS = {
 }
 
 
-def check(name: str):  # noqa: ANN201
-    def register(fn):  # noqa: ANN001, ANN202
+def check(name: str):
+    def register(fn):
         CHECKS.append((name, fn))
         return fn
 
@@ -85,14 +85,19 @@ def _() -> None:
     registry = load_registry()
     assert len(registry.criteria) == 7
     assert [c.order for c in registry.criteria] == list(range(1, 8))
-    assert all(0 <= c.indifference_threshold < c.preference_threshold <= 1 for c in registry.criteria)
+    assert all(
+        0 <= c.indifference_threshold < c.preference_threshold <= 1 for c in registry.criteria
+    )
     assert registry.content_hash.startswith("sha256:")
 
 
 @check("normalization respects direction and zero range")
 def _() -> None:
     registry = load_registry()
-    models = [make_model("A a", price=100_00, battery=300), make_model("B b", price=200_00, battery=900)]
+    models = [
+        make_model("A a", price=100_00, battery=300),
+        make_model("B b", price=200_00, battery=900),
+    ]
     matrix = normalize(models, registry)
     assert matrix.values["price"] == (1.0, 0.0), matrix.values["price"]
     assert matrix.values["battery"] == (0.0, 1.0)
@@ -130,7 +135,11 @@ def _() -> None:
 @check("golden price ranking reproduces 1.5 / 0 / -1.5")
 def _() -> None:
     registry = load_registry()
-    models = [make_model("A a", price=100_00), make_model("B b", price=200_00), make_model("C c", price=300_00)]
+    models = [
+        make_model("A a", price=100_00),
+        make_model("B b", price=200_00),
+        make_model("C c", price=300_00),
+    ]
     weights = {key: (1.0 if key == "price" else 0.0) for key in registry.keys}
     result = vectorized_sir.rank(models, weights, registry)
     assert [round(s.net_score, 9) for s in result.ordered] == [1.5, 0.0, -1.5]
@@ -277,11 +286,14 @@ def _() -> None:
         "http://example.invalid/feed", field_map=field_map, fetch_json=lambda _: payload
     )
 
-    def unavailable(_: str):  # noqa: ANN202
+    def unavailable(_: str):
         raise CatalogSourceError("HTTP 403 from retailer")
 
     blocked = JsonEndpointSource(
-        "http://retailer.invalid/feed", field_map=field_map, fetch_json=unavailable, name="live:retailer"
+        "http://retailer.invalid/feed",
+        field_map=field_map,
+        fetch_json=unavailable,
+        name="live:retailer",
     )
 
     result = refresh([blocked, good])
@@ -318,21 +330,44 @@ def _() -> None:
     from laptop_dss.catalog.adapters.import_catalog import import_csv
 
     columns = [
-        "brand", "model_name", "os", "form_factor", "price_rub", "cpu_score",
-        "ram_gb", "weight_g", "battery_minutes", "screen_score", "warranty_months",
+        "brand",
+        "model_name",
+        "os",
+        "form_factor",
+        "price_rub",
+        "cpu_score",
+        "ram_gb",
+        "weight_g",
+        "battery_minutes",
+        "screen_score",
+        "warranty_months",
     ]
     rows = [
         {
-            "brand": "ImportTest", "model_name": "Row One", "os": "linux",
-            "form_factor": "ultrabook", "price_rub": "33 990", "cpu_score": "4200",
-            "ram_gb": "16", "weight_g": "1300", "battery_minutes": "600",
-            "screen_score": "7.2", "warranty_months": "24",
+            "brand": "ImportTest",
+            "model_name": "Row One",
+            "os": "linux",
+            "form_factor": "ultrabook",
+            "price_rub": "33 990",
+            "cpu_score": "4200",
+            "ram_gb": "16",
+            "weight_g": "1300",
+            "battery_minutes": "600",
+            "screen_score": "7.2",
+            "warranty_months": "24",
         },
         {
-            "brand": "ImportTest", "model_name": "Broken Row", "os": "amiga",
-            "form_factor": "ultrabook", "price_rub": "1000", "cpu_score": "1",
-            "ram_gb": "8", "weight_g": "1000", "battery_minutes": "300",
-            "screen_score": "5.0", "warranty_months": "12",
+            "brand": "ImportTest",
+            "model_name": "Broken Row",
+            "os": "amiga",
+            "form_factor": "ultrabook",
+            "price_rub": "1000",
+            "cpu_score": "1",
+            "ram_gb": "8",
+            "weight_g": "1000",
+            "battery_minutes": "300",
+            "screen_score": "5.0",
+            "warranty_months": "12",
         },
     ]
     with tempfile.NamedTemporaryFile(
@@ -398,9 +433,7 @@ def _() -> None:
         item["rank"] for item in payload["items"]
     ]
     ids = [item["model"]["id"] for item in payload["items"][:3]]
-    comparison = client.post(
-        f"/api/v1/rankings/{ranking_id}/comparison", json={"model_ids": ids}
-    )
+    comparison = client.post(f"/api/v1/rankings/{ranking_id}/comparison", json={"model_ids": ids})
     assert comparison.status_code == 200, comparison.text
     assert len(comparison.json()["rows"]) == 7
 
@@ -413,9 +446,9 @@ def _() -> None:
     assert payload["candidate_count"] == 0
     assert payload["items"] == []
     assert payload["empty_reason"] == "budget_too_low"
-    cheapest = client.get(
-        "/api/v1/models", params={"page_size": 1, "sort": "price_asc"}
-    ).json()["items"][0]["price_minor"]
+    cheapest = client.get("/api/v1/models", params={"page_size": 1, "sort": "price_asc"}).json()[
+        "items"
+    ][0]["price_minor"]
     assert payload["cheapest_price_minor"] == cheapest, "the empty state must name a real price"
 
 
@@ -473,9 +506,12 @@ def _() -> None:
 @check("register, login, profile save, and partial weight change")
 def _() -> None:
     email = f"student-{uuid.uuid4().hex[:8]}@example.com"
-    assert client.post(
-        "/api/v1/auth/register", json={"email": email, "password": "long-password-12"}
-    ).status_code == 201
+    assert (
+        client.post(
+            "/api/v1/auth/register", json={"email": email, "password": "long-password-12"}
+        ).status_code
+        == 201
+    )
     login = client.post("/api/v1/auth/login", json={"email": email, "password": "long-password-12"})
     assert login.status_code == 200, login.text
     CTX["email"] = email
@@ -501,7 +537,9 @@ def _() -> None:
     )
     assert saved.status_code == 200, saved.text
     assert saved.json()["revision"] == 1
-    patched = client.patch("/api/v1/profile", json={"weights": {**weights, "battery": 0.4, "price": 0.0}})
+    patched = client.patch(
+        "/api/v1/profile", json={"weights": {**weights, "battery": 0.4, "price": 0.0}}
+    )
     assert patched.status_code == 200, patched.text
     assert patched.json()["revision"] == 2
     assert patched.json()["weights"]["battery"] == 0.4
@@ -567,7 +605,7 @@ def _() -> None:
     assert battery_row["values"][battery_row["best_index"]] == max(battery_row["values"])
     too_many = client.post(
         f"/api/v1/rankings/{ranking_id}/comparison",
-        json={"model_ids": ids + [ids[0]]},
+        json={"model_ids": [*ids, ids[0]]},
     )
     assert too_many.status_code == 422 or too_many.status_code == 400
 
@@ -577,7 +615,10 @@ def _() -> None:
     admin = TestClient(app, raise_server_exceptions=False)
     login = admin.post(
         "/api/v1/auth/login",
-        json={"email": os.environ.get("SEED_ADMIN_EMAIL", "admin@example.com"), "password": os.environ.get("SEED_ADMIN_PASSWORD", "admin-password-12")},
+        json={
+            "email": os.environ.get("SEED_ADMIN_EMAIL", "admin@example.com"),
+            "password": os.environ.get("SEED_ADMIN_PASSWORD", "admin-password-12"),
+        },
     )
     assert login.status_code == 200, login.text
     suffix = uuid.uuid4().hex[:6]
@@ -648,7 +689,9 @@ def main() -> int:
             traceback.print_exc()
         else:
             print(f"ok    {name}")
-    executed = len(CHECKS) - failures if not unit_only else len(CHECKS) - len(_API_CHECKS) - failures
+    executed = (
+        len(CHECKS) - failures if not unit_only else len(CHECKS) - len(_API_CHECKS) - failures
+    )
     print(f"\n{executed} checks passed, {failures} failed")
     return 1 if failures else 0
 

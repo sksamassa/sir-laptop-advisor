@@ -52,7 +52,7 @@ def _parse_row(row: dict[str, str]) -> dict[str, Any]:
         "model_name": row["model_name"].strip(),
         "os": row["os"].strip().lower(),
         "form_factor": row["form_factor"].strip().lower(),
-        "price_minor": int(round(price_rub * 100)),
+        "price_minor": round(price_rub * 100),
         "cpu_score": int(float(row["cpu_score"])),
         "ram_gb": int(float(row["ram_gb"])),
         "weight_g": int(float(row["weight_g"])),

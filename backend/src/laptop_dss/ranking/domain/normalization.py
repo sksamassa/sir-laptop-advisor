@@ -7,8 +7,8 @@ the criterion contributes no differences -- it cannot destabilize the ranking.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
 
 from laptop_dss.catalog.domain.criteria import CriteriaRegistry
 from laptop_dss.catalog.domain.device import DeviceModel
@@ -28,7 +28,9 @@ class NormalizedMatrix:
 
 def normalize(models: Sequence[DeviceModel], registry: CriteriaRegistry) -> NormalizedMatrix:
     if not models:
-        return NormalizedMatrix(keys=registry.keys, model_ids=(), values={k: () for k in registry.keys})
+        return NormalizedMatrix(
+            keys=registry.keys, model_ids=(), values={k: () for k in registry.keys}
+        )
 
     model_ids = tuple(str(m.id) for m in models)
     normalized: dict[str, tuple[float, ...]] = {}

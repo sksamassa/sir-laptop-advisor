@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 import pytest
+from tests.conftest import make_model
 
 from laptop_dss.ranking.adapters import vectorized_sir
 from laptop_dss.ranking.domain import sir_reference
-from tests.conftest import make_model
 
 
-def _price_only_weights(registry) -> dict[str, float]:  # noqa: ANN001
+def _price_only_weights(registry) -> dict[str, float]:
     return {key: (1.0 if key == "price" else 0.0) for key in registry.keys}
 
 
-def test_golden_price_ranking(registry) -> None:  # noqa: ANN001
+def test_golden_price_ranking(registry) -> None:
     # Only price varies; min-max on three values 10 000 / 20 000 / 30 000 RUB
     # yields normalized 1.0 / 0.5 / 0.0, and with one active criterion
     # net(a) = 3*v(a) - sum(v) => 1.5 / 0.0 / -1.5.
@@ -31,7 +31,7 @@ def test_golden_price_ranking(registry) -> None:  # noqa: ANN001
         assert result.ordered[0].contributions["price"].normalized == pytest.approx(1.0)
 
 
-def test_golden_second_criterion_flips_memory_order(registry) -> None:  # noqa: ANN001
+def test_golden_second_criterion_flips_memory_order(registry) -> None:
     # Memory dominates; more RAM must rank first even at a higher price.
     models = [
         make_model("A a", price=100_00, memory=8),

@@ -1,4 +1,4 @@
-﻿"""FastAPI application: wiring, middleware, and error translation."""
+"""FastAPI application: wiring, middleware, and error translation."""
 
 from __future__ import annotations
 
@@ -7,7 +7,8 @@ import os
 import secrets
 import time
 from collections import deque
-from typing import Any, Awaitable, Callable
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,6 +27,7 @@ class Utf8JSONResponse(JSONResponse):
     """JSON with an explicit charset, as promised by contracts/api.md."""
 
     media_type = "application/json; charset=utf-8"
+
 
 # (limit, window_seconds) per POST path; a coursework-scale, in-process guard.
 RATE_LIMITS: dict[str, tuple[int, int]] = {
@@ -70,7 +72,9 @@ def create_app() -> FastAPI:
     )
 
     @app.middleware("http")
-    async def request_context(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+    async def request_context(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         request_id = secrets.token_hex(8)
         started = time.perf_counter()
         if request.method == "POST" and _rate_limited(
@@ -146,4 +150,3 @@ def seed_demo() -> dict[str, Any]:
         profiles_repo.create_user(email, auth.hash_password(password), role="maintainer")
         created_admin = True
     return {"models_inserted": inserted, "admin_created": created_admin}
-

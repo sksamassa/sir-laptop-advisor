@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Mapping
 
 from laptop_dss.shared.domain.errors import InvalidWeights
 
@@ -16,7 +16,7 @@ class WeightSet:
     values: Mapping[str, float]
 
     @classmethod
-    def from_user_input(cls, raw: Mapping[str, float], keys: tuple[str, ...]) -> "WeightSet":
+    def from_user_input(cls, raw: Mapping[str, float], keys: tuple[str, ...]) -> WeightSet:
         if set(raw) != set(keys):
             raise InvalidWeights("Веса должны быть заданы для всех семи критериев")
         numeric: dict[str, float] = {}

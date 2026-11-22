@@ -9,9 +9,10 @@ plain SQL. Swapping in SQLAlchemy later only touches the adapters.
 from __future__ import annotations
 
 import os
+from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Iterator, Sequence
+from typing import Any
 
 import psycopg2
 from psycopg2.extras import RealDictCursor, register_uuid

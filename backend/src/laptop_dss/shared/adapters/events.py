@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from typing import Callable
+from collections.abc import Callable
 
 from laptop_dss.shared.adapters import db
 from laptop_dss.shared.application.events import DomainEvent, Handler
@@ -39,9 +39,7 @@ class InProcessEventBus:
         applied = 0
         for handler_name, handler in self._handlers.get(event.name, []):
             if self._claim is not None and not self._claim(event.event_id, handler_name):
-                logger.debug(
-                    "skip duplicate event=%s handler=%s", event.event_id, handler_name
-                )
+                logger.debug("skip duplicate event=%s handler=%s", event.event_id, handler_name)
                 continue
             handler(event)
             applied += 1

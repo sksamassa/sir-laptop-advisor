@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import re
 import uuid
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 from laptop_dss.catalog.adapters.criteria_source import load_registry
 from laptop_dss.catalog.domain.device import CriterionValues, DeviceModel
@@ -258,5 +259,5 @@ def seed(models: list[dict[str, Any]]) -> int:
     return inserted
 
 
-def registry():  # noqa: ANN201 - re-exported for convenience
+def registry():
     return load_registry()

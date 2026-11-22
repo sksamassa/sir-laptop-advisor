@@ -15,9 +15,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "src"), str(ROOT), str(ROOT / "tests")]
 
+from helpers import random_models, uniform_weights  # noqa: E402
 from laptop_dss.catalog.adapters.criteria_source import load_registry  # noqa: E402
 from laptop_dss.ranking.adapters import vectorized_sir  # noqa: E402
-from helpers import random_models, uniform_weights  # noqa: E402
 
 MODEL_COUNT = 5_000
 BUDGET_SECONDS = 0.3  # plan target: ranking p95 <= 300 ms

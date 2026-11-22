@@ -7,8 +7,8 @@ compares the two on random matrices. Never optimize this file.
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Mapping, Sequence
 
 from laptop_dss.catalog.domain.criteria import CriteriaRegistry
 from laptop_dss.catalog.domain.device import DeviceModel
@@ -51,7 +51,7 @@ def _flows(
     phi_minus = {model_id: 0.0 for model_id in ids}
 
     for i, a in enumerate(ids):
-        for j, b in enumerate(ids):
+        for j in range(len(ids)):
             if i == j:
                 continue
             for criterion in registry.criteria:

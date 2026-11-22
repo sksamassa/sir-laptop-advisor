@@ -38,7 +38,9 @@ class Settings:
 
 
 def load_settings() -> Settings:
-    origins = tuple(o.strip() for o in _env("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip())
+    origins = tuple(
+        o.strip() for o in _env("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()
+    )
     if "*" in origins:
         raise RuntimeError("CORS_ORIGINS must be an explicit allowlist, not a wildcard")
     return Settings(

@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any, Mapping, Sequence
+from collections.abc import Mapping, Sequence
+from typing import Any
 
 from laptop_dss.catalog.adapters import repository as catalog_repo
-from laptop_dss.catalog.domain.criteria import CriteriaRegistry
 from laptop_dss.catalog.adapters.criteria_source import load_registry
+from laptop_dss.catalog.domain.criteria import CriteriaRegistry
 from laptop_dss.catalog.domain.device import DeviceModel
 from laptop_dss.profiles.domain.weights import WeightSet, default_weights
 from laptop_dss.ranking.adapters import repository as ranking_repo

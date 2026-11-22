@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any, Callable, Mapping, Protocol
+from typing import Any, Protocol
 
 
 @dataclass(frozen=True, slots=True)

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime, timedelta
-from typing import Any, Mapping
+from typing import Any
 
 from laptop_dss.profiles.domain.weights import WeightSet
 from laptop_dss.shared.adapters import db
@@ -22,15 +22,14 @@ WEIGHT_COLUMNS = {
 
 def find_user_by_email(email: str) -> dict[str, Any] | None:
     return db.fetch_one(
-        "SELECT id, email, password_hash, role, created_at FROM users WHERE lower(email) = lower(%s)",
+        "SELECT id, email, password_hash, role, created_at FROM users "
+        "WHERE lower(email) = lower(%s)",
         (email,),
     )
 
 
 def get_user(user_id: uuid.UUID) -> dict[str, Any] | None:
-    return db.fetch_one(
-        "SELECT id, email, role, created_at FROM users WHERE id = %s", (user_id,)
-    )
+    return db.fetch_one("SELECT id, email, role, created_at FROM users WHERE id = %s", (user_id,))
 
 
 def create_user(email: str, password_hash: str, role: str = "shopper") -> dict[str, Any]:
@@ -52,7 +51,8 @@ def create_session(
 ) -> None:
     now = datetime.now(UTC)
     db.execute(
-        "INSERT INTO sessions (id, user_id, token_hash, last_seen_at, expires_at, absolute_expires_at) "
+        "INSERT INTO sessions (id, user_id, token_hash, last_seen_at, expires_at, "
+        "absolute_expires_at) "
         "VALUES (%s, %s, %s, %s, %s, %s)",
         (
             uuid.uuid4(),

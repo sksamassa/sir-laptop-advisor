@@ -29,14 +29,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install backend with dev tools
-        run: pip install -e "backend[dev]"
+      - name: Install dependencies
+        run: pip install -r backend/requirements-dev.txt
       - name: Lint
         run: ruff check backend/src backend/tests
       - name: Format check
         run: ruff format --check backend/src backend/tests
       - name: Type check (domain and application layers)
-        run: mypy --config-file backend/pyproject.toml backend/src/laptop_dss/*/domain backend/src/laptop_dss/shared/domain
+        env:
+          MYPYPATH: backend/src
+        run: >-
+          mypy --explicit-package-bases --config-file backend/pyproject.toml
+          backend/src/laptop_dss/*/domain backend/src/laptop_dss/shared/domain
       - name: Acceptance checks (unit + API)
         working-directory: backend
         run: python tests/run_checks.py
@@ -66,14 +70,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Frontend gates (skipped until the app exists)
-        run: |
-          if [ ! -f frontend/package.json ]; then
-            echo "frontend/package.json not present yet; skipping"
-            exit 0
-          fi
-          cd frontend
-          npm ci
-          npx tsc --noEmit
-          npm run lint --if-present
-          npm test --if-present
+      - name: Install frontend
+        working-directory: frontend
+        run: npm ci
+      - name: Type check
+        working-directory: frontend
+        run: npm run typecheck
+      - name: Production build
+        working-directory: frontend
+        run: npm run build
+        env:
+          # The build only needs a syntactically valid origin; the rewrite target
+          # is evaluated at request time, not build time.
+          API_ORIGIN: http://127.0.0.1:8000
+
+  # Playwright needs a browser and a running API + UI, so it stays a local gate:
+  #   make api &  cd frontend && npm start &  npx playwright test
+  # Wiring it into CI would require installing browsers and a compose stack.
+  e2e:
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Run the e2e suite locally against the compose stack"

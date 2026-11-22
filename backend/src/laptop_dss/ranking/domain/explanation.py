@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Mapping
+from collections.abc import Mapping
 
 from laptop_dss.catalog.domain.criteria import CriteriaRegistry
-from laptop_dss.ranking.domain.sir_reference import SirScore
+from laptop_dss.ranking.domain.sir_reference import CriterionContribution, SirScore
 
 
 def _label(registry: CriteriaRegistry, key: str) -> str:
@@ -20,9 +20,7 @@ def build_reason(
     rank: int,
     total: int,
 ) -> str:
-    contributions = {
-        key: value.contribution for key, value in score.contributions.items()
-    }
+    contributions = {key: value.contribution for key, value in score.contributions.items()}
     if not contributions:
         return f"{model_name}: недостаточно данных для объяснения."
     ranked = sorted(contributions.items(), key=lambda item: item[1], reverse=True)
@@ -81,11 +79,13 @@ def gap_to_top(
     }
 
 
-def contribution_payload(contributions: Mapping[str, object]) -> dict[str, dict[str, float]]:
+def contribution_payload(
+    contributions: Mapping[str, CriterionContribution],
+) -> dict[str, dict[str, float]]:
     payload: dict[str, dict[str, float]] = {}
     for key, value in contributions.items():
         payload[key] = {
-            "normalized": round(float(getattr(value, "normalized")), 6),
-            "contribution": round(float(getattr(value, "contribution")), 6),
+            "normalized": round(float(value.normalized), 6),
+            "contribution": round(float(value.contribution), 6),
         }
     return payload

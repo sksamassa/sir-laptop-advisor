@@ -37,3 +37,12 @@ desktop.ini
 # Local databases and dumps
 *.sqlite3
 *.db
+
+.venv-tools/
+.coverage
+htmlcov/
+
+.tmpbuild/
+backend/build/
+backend/*.egg-info/
+

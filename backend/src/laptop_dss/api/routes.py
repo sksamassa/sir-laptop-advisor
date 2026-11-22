@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import Mapping
 from datetime import UTC, datetime
-from typing import Any, Mapping
+from typing import Any
 
 import psycopg2
 from fastapi import APIRouter, Depends, Query, Request, Response
@@ -301,9 +302,8 @@ def replay(
     if stored is None:
         raise NotFound("Ранжирование не найдено")
     # Owner-only for account rankings; a guest ranking is addressed by its id.
-    if stored["user_id"] is not None:
-        if user is None or str(stored["user_id"]) != user["id"]:
-            raise NotFound("Ранжирование не найдено")
+    if stored["user_id"] is not None and (user is None or str(stored["user_id"]) != user["id"]):
+        raise NotFound("Ранжирование не найдено")
     payload = rank_laptops.replay_ranking(ranking_id)
     assert payload is not None
 
@@ -343,9 +343,7 @@ def comparison(
     request: Request,
 ) -> dict[str, Any]:
     user = deps.current_user(request)
-    return compare_uc.compare(
-        ranking_id, payload.model_ids, user_id=user["id"] if user else None
-    )
+    return compare_uc.compare(ranking_id, payload.model_ids, user_id=user["id"] if user else None)
 
 
 # ------------------------------------------------------------------ admin catalog
@@ -361,7 +359,8 @@ def refresh_catalog(
     configured = catalog_sources.configured_sources()
     if not configured:
         raise ValidationError(
-            "Источник не настроен: задайте CATALOG_LIVE_URL, CATALOG_HTML_CONFIG или CATALOG_CSV_PATH"
+            "Источник не настроен: задайте CATALOG_LIVE_URL, "
+            "CATALOG_HTML_CONFIG или CATALOG_CSV_PATH"
         )
     result = catalog_sources.refresh(configured)
     if not result["source"]:
@@ -431,4 +430,4 @@ def utcnow() -> datetime:
     return datetime.now(UTC)
 
 
-__all__ = ["router", "ValidationError"]
+__all__ = ["ValidationError", "router"]

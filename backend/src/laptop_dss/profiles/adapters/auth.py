@@ -19,7 +19,13 @@ from laptop_dss.profiles.domain.entities import Profile, Session, User
 from laptop_dss.profiles.domain.weights import WeightSet
 from laptop_dss.shared.adapters import events
 from laptop_dss.shared.application.events import DomainEvent
-from laptop_dss.shared.domain.errors import Conflict, InvalidWeights, NotFound, Unauthorized, ValidationError
+from laptop_dss.shared.domain.errors import (
+    Conflict,
+    InvalidWeights,
+    NotFound,
+    Unauthorized,
+    ValidationError,
+)
 
 _hasher = PasswordHasher()
 settings = load_settings()
@@ -61,8 +67,7 @@ def login(email: str, password: str) -> IssuedSession:
     Session(
         user_id=user["id"],
         token_hash=token_hash,
-        absolute_expires_at=datetime.now(UTC)
-        + timedelta(days=settings.session_absolute_days),
+        absolute_expires_at=datetime.now(UTC) + timedelta(days=settings.session_absolute_days),
     )
     repo.create_session(
         user["id"],

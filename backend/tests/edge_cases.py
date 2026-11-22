@@ -15,8 +15,6 @@ from pathlib import Path
 
 from laptop_dss.catalog.adapters.criteria_source import load_registry
 from laptop_dss.catalog.domain.criteria import (
-    CriteriaRegistry,
-    Criterion,
     RegistryError,
 )
 from laptop_dss.catalog.domain.device import CriterionValues, DeviceModel
@@ -73,8 +71,8 @@ def run_edge_cases() -> None:
 
     # ---- money and identifiers -------------------------------------------
     assert str(rubles(6499000)) == "64990"
-    assert format_rub(6499000) == "64 990 \u20BD"
-    assert format_rub(6499050).endswith(",50 \u20BD")
+    assert format_rub(6499000) == "64 990 \u20bd"
+    assert format_rub(6499050).endswith(",50 \u20bd")
     assert isinstance(new_id(), uuid.UUID)
     assert SystemClock().now().tzinfo is UTC
     fixed = FixedClock(datetime(2026, 1, 1, tzinfo=UTC))
@@ -109,8 +107,11 @@ def run_edge_cases() -> None:
             raise AssertionError(f"expected rejection for {bad}")
 
     try:
-        _model(values=CriterionValues(price=0, performance=1, memory=8, weight=1000,
-                                      battery=300, screen=5.0, warranty=12))
+        _model(
+            values=CriterionValues(
+                price=0, performance=1, memory=8, weight=1000, battery=300, screen=5.0, warranty=12
+            )
+        )
     except errors.ValidationError:
         pass
     else:
@@ -147,7 +148,7 @@ def run_edge_cases() -> None:
 
     raw = json.loads((Path(registry_probe_path())).read_text(encoding="utf-8"))
 
-    def broken_registry(mutate) -> None:  # noqa: ANN001
+    def broken_registry(mutate) -> None:
         payload = json.loads(json.dumps(raw))
         mutate(payload)
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as fh:
@@ -163,8 +164,11 @@ def run_edge_cases() -> None:
 
     broken_registry(lambda data: data["criteria"].pop())
     broken_registry(lambda data: data["criteria"][0].update(direction="sideways"))
-    broken_registry(lambda data: data["criteria"][0].update(indifference_threshold=0.9,
-                                                             preference_threshold=0.1))
+    broken_registry(
+        lambda data: data["criteria"][0].update(
+            indifference_threshold=0.9, preference_threshold=0.1
+        )
+    )
     broken_registry(lambda data: data["criteria"][0].update(order=9))
 
     # ---- weights ---------------------------------------------------------

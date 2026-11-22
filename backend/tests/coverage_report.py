@@ -8,6 +8,7 @@ domain modules. Run: python tests/coverage_report.py
 from __future__ import annotations
 
 import ast
+import contextlib
 import sys
 import threading
 import trace
@@ -43,10 +44,8 @@ def main() -> int:
         import importlib
 
         module = importlib.import_module("run_checks")
-        try:
+        with contextlib.suppress(SystemExit):
             module.main()
-        except SystemExit:
-            pass
 
     tracer.runfunc(run)
     counts = tracer.results().counts

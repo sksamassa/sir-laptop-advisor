@@ -21,7 +21,4 @@ def preference(d: float, *, q: float, p: float) -> float:
 
 
 def thresholds(registry: CriteriaRegistry) -> dict[str, tuple[float, float]]:
-    return {
-        c.key: (c.indifference_threshold, c.preference_threshold)
-        for c in registry.criteria
-    }
+    return {c.key: (c.indifference_threshold, c.preference_threshold) for c in registry.criteria}

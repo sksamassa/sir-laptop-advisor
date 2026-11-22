@@ -14,19 +14,19 @@ Constraints); the reference implementation stays pure Python.
 
 from __future__ import annotations
 
-from typing import Mapping, Sequence
+from collections.abc import Mapping, Sequence
 
 import numpy as np
 
 from laptop_dss.catalog.domain.criteria import CriteriaRegistry
 from laptop_dss.catalog.domain.device import DeviceModel
 from laptop_dss.ranking.domain.normalization import normalize
+from laptop_dss.ranking.domain.preference import thresholds
 from laptop_dss.ranking.domain.sir_reference import (
     CriterionContribution,
     SirResult,
     SirScore,
 )
-from laptop_dss.ranking.domain.preference import thresholds
 
 
 def _sum_preference(

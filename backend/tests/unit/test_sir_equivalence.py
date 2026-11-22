@@ -5,12 +5,12 @@ from __future__ import annotations
 import dataclasses
 
 import pytest
+from tests.conftest import random_models, uniform_weights
 
-from laptop_dss.catalog.domain.criteria import CriteriaRegistry
 from laptop_dss.catalog.adapters.criteria_source import load_registry
+from laptop_dss.catalog.domain.criteria import CriteriaRegistry
 from laptop_dss.ranking.adapters import vectorized_sir
 from laptop_dss.ranking.domain import sir_reference
-from tests.conftest import random_models, uniform_weights
 
 
 def _thresholded_registry(q: float, p: float) -> CriteriaRegistry:
@@ -24,7 +24,7 @@ def _thresholded_registry(q: float, p: float) -> CriteriaRegistry:
 
 @pytest.mark.parametrize("seed", [1, 2, 3, 4, 5])
 @pytest.mark.parametrize("count", [3, 5, 8])
-def test_engines_agree_on_random_matrices(registry, seed: int, count: int) -> None:  # noqa: ANN001
+def test_engines_agree_on_random_matrices(registry, seed: int, count: int) -> None:
     models = random_models(count, seed)
     weights = uniform_weights(registry)
     reference = sir_reference.rank(models, weights, registry)
@@ -42,7 +42,7 @@ def test_engines_agree_on_random_matrices(registry, seed: int, count: int) -> No
 
 
 @pytest.mark.parametrize("seed", [11, 12, 13])
-def test_engines_agree_with_thresholds(registry, seed: int) -> None:  # noqa: ANN001
+def test_engines_agree_with_thresholds(registry, seed: int) -> None:
     models = random_models(6, seed)
     weights = {key: (index + 1) / 28 for index, key in enumerate(registry.keys)}
     tuned = _thresholded_registry(q=0.1, p=0.4)
@@ -55,7 +55,7 @@ def test_engines_agree_with_thresholds(registry, seed: int) -> None:  # noqa: AN
         assert left.net_score == pytest.approx(right.net_score, abs=1e-9)
 
 
-def test_engines_agree_on_degenerate_inputs(registry) -> None:  # noqa: ANN001
+def test_engines_agree_on_degenerate_inputs(registry) -> None:
     weights = uniform_weights(registry)
     models = [random_models(2, 21)[0]]
     assert [s.model_id for s in sir_reference.rank(models, weights, registry).ordered] == [
