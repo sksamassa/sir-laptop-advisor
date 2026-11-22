@@ -90,6 +90,13 @@ def get_model(model_id: uuid.UUID) -> dict[str, Any] | None:
     return db.fetch_one(f"SELECT {_COLUMNS} FROM device_models WHERE id = %s", (model_id,))
 
 
+def find_by_natural_key(brand: str, model_name: str) -> dict[str, Any] | None:
+    return db.fetch_one(
+        f"SELECT {_COLUMNS} FROM device_models WHERE brand = %s AND model_name = %s",
+        (brand, model_name),
+    )
+
+
 def eligible_by_budget(budget_minor: int) -> list[DeviceModel]:
     rows = db.fetch_all(
         f"SELECT {_COLUMNS} FROM device_models "

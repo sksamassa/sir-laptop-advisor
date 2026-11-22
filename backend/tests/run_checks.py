@@ -39,10 +39,12 @@ CTX: dict[str, object] = {}
 _API_CHECKS = {
     "health and criteria endpoints",
     "catalog listing, filtering, pagination",
+    "catalog can be refreshed from a CSV of real prices",
     "guest ranking is ordered, budget-bounded, and explained",
     "guest ranking is replayable and comparable by its id",
     "empty budget returns an empty state, not an error",
     "a student budget of 30 000 RUB finds affordable models",
+    "a 20 000 RUB budget still returns laptops",
     "invalid weights are rejected with 400 invalid_weights",
     "unknown fields are rejected with 422",
     "register, login, profile save, and partial weight change",
@@ -232,6 +234,55 @@ def _() -> None:
     assert page["page"] == 2
 
 
+@check("catalog can be refreshed from a CSV of real prices")
+def _() -> None:
+    import csv
+    import tempfile
+    from pathlib import Path as _Path
+
+    from laptop_dss.catalog.adapters.import_catalog import import_csv
+
+    columns = [
+        "brand", "model_name", "os", "form_factor", "price_rub", "cpu_score",
+        "ram_gb", "weight_g", "battery_minutes", "screen_score", "warranty_months",
+    ]
+    rows = [
+        {
+            "brand": "ImportTest", "model_name": "Row One", "os": "linux",
+            "form_factor": "ultrabook", "price_rub": "33 990", "cpu_score": "4200",
+            "ram_gb": "16", "weight_g": "1300", "battery_minutes": "600",
+            "screen_score": "7.2", "warranty_months": "24",
+        },
+        {
+            "brand": "ImportTest", "model_name": "Broken Row", "os": "amiga",
+            "form_factor": "ultrabook", "price_rub": "1000", "cpu_score": "1",
+            "ram_gb": "8", "weight_g": "1000", "battery_minutes": "300",
+            "screen_score": "5.0", "warranty_months": "12",
+        },
+    ]
+    with tempfile.NamedTemporaryFile(
+        "w", suffix=".csv", delete=False, encoding="utf-8", newline=""
+    ) as handle:
+        writer = csv.DictWriter(handle, fieldnames=columns)
+        writer.writeheader()
+        writer.writerows(rows)
+        path = _Path(handle.name)
+
+    first = import_csv(path)
+    assert first["inserted"] == 1, first
+    assert len(first["errors"]) == 1, "the invalid row must be reported"
+
+    second = import_csv(path)
+    assert second["inserted"] == 0 and second["updated"] == 1, second
+
+    payload = client.get("/api/v1/models", params={"q": "Row One"}).json()
+    assert payload["total"] == 1
+    assert payload["items"][0]["price_minor"] == 3_399_000
+
+    db.execute("DELETE FROM device_models WHERE brand = 'ImportTest'")
+    path.unlink(missing_ok=True)
+
+
 @check("guest ranking is ordered, budget-bounded, and explained")
 def _() -> None:
     response = client.post(
@@ -298,6 +349,15 @@ def _() -> None:
     assert all(item["model"]["price_minor"] <= 30_000_00 for item in payload["items"])
     assert payload["items"][0]["rank"] == 1
     assert payload["items"][0]["reason"]
+
+
+@check("a 20 000 RUB budget still returns laptops")
+def _() -> None:
+    payload = client.post(
+        "/api/v1/rankings", json={"budget_minor": 20_000_00, "goals": ["study"]}
+    ).json()
+    assert payload["candidate_count"] >= 1, payload
+    assert all(item["model"]["price_minor"] <= 20_000_00 for item in payload["items"])
 
 
 @check("invalid weights are rejected with 400 invalid_weights")

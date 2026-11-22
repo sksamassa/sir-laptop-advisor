@@ -230,6 +230,10 @@ def run_edge_cases() -> None:
     neutral_text = explanation.build_reason(neutral, registry, "Model Y", rank=1, total=1)
     assert "равны" in neutral_text
 
+    losing = _score(str(uuid.uuid4()), {"price": -0.2, "performance": -0.1})
+    losing_text = explanation.build_reason(losing, registry, "Model Z", rank=3, total=3)
+    assert "ни один критерий не дал преимущества" in losing_text
+
     top = _score("a", {"price": -0.1, "performance": 0.5})
     other = _score("b", {"price": 0.2, "performance": 0.1})
     gap = explanation.gap_to_top(top, other, registry)

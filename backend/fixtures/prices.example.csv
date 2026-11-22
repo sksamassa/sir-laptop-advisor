@@ -1,0 +1,4 @@
+brand,model_name,os,form_factor,price_rub,cpu_score,ram_gb,weight_g,battery_minutes,screen_score,warranty_months
+IRBIS,NB15,windows,laptop,15990,1700,8,1700,300,5.0,12
+Digma,EVE 15 C423,windows,laptop,17990,1900,8,1650,380,5.2,12
+Lenovo,IdeaPad 1 15,windows,laptop,24990,2400,8,1600,400,5.6,12

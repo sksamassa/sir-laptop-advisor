@@ -175,8 +175,11 @@ const setBudget = async (rubles) => {
 await setBudget(30000);
 await shot("07-budget-30000");
 
+await setBudget(20000);
+await shot("08-budget-20000");
+
 await setBudget(10000);
-await shot("08-budget-10000");
+await shot("09-budget-10000");
 
 
 ws.close();

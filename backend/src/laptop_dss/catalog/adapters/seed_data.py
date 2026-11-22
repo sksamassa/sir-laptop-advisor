@@ -1,4 +1,11 @@
-"""Demo catalog used by the idempotent seed. Prices are in kopecks."""
+"""Demo catalog used by the idempotent seed. Prices are in kopecks.
+
+The prices are an indicative snapshot of Russian retail for the coursework
+(November 2026), covering the real market range from ~16k to 200k RUB. They are
+not a live feed: the spec keeps live prices out of scope and leaves catalog
+maintenance to a maintainer, so treat this list as a demonstration dataset that
+happens to be realistic, not as a price guarantee.
+"""
 
 from __future__ import annotations
 
@@ -105,5 +112,124 @@ DEMO_MODELS: list[dict[str, object]] = [
         "os": "windows", "form_factor": "laptop", "price_minor": 44_990_00,
         "cpu_score": 4_600, "ram_gb": 16, "weight_g": 1_690, "battery_minutes": 450,
         "screen_score": 6.4, "warranty_months": 24,
+    },
+    # Entry level, 16–25k RUB: entry-level CPUs, 8 GB, basic panels. A shopper
+    # with a 20 000 RUB budget must still receive options.
+    {
+        "brand": "IRBIS", "model_name": "NB15", "slug": "irbis-nb15",
+        "os": "windows", "form_factor": "laptop", "price_minor": 15_990_00,
+        "cpu_score": 1_700, "ram_gb": 8, "weight_g": 1_700, "battery_minutes": 300,
+        "screen_score": 5.0, "warranty_months": 12,
+    },
+    {
+        "brand": "Digma", "model_name": "EVE 15 C423", "slug": "digma-eve-15-c423",
+        "os": "windows", "form_factor": "laptop", "price_minor": 17_990_00,
+        "cpu_score": 1_900, "ram_gb": 8, "weight_g": 1_650, "battery_minutes": 380,
+        "screen_score": 5.2, "warranty_months": 12,
+    },
+    {
+        "brand": "Echips", "model_name": "Envy 15", "slug": "echips-envy-15",
+        "os": "windows", "form_factor": "laptop", "price_minor": 19_490_00,
+        "cpu_score": 1_700, "ram_gb": 8, "weight_g": 1_700, "battery_minutes": 320,
+        "screen_score": 5.0, "warranty_months": 12,
+    },
+    {
+        "brand": "Prestigio", "model_name": "SmartBook 141 C25", "slug": "prestigio-smartbook-141-c25",
+        "os": "windows", "form_factor": "laptop", "price_minor": 21_990_00,
+        "cpu_score": 2_000, "ram_gb": 8, "weight_g": 1_350, "battery_minutes": 420,
+        "screen_score": 5.4, "warranty_months": 12,
+    },
+    {
+        "brand": "Lenovo", "model_name": "IdeaPad 1 15", "slug": "lenovo-ideapad-1-15",
+        "os": "windows", "form_factor": "laptop", "price_minor": 24_990_00,
+        "cpu_score": 2_400, "ram_gb": 8, "weight_g": 1_600, "battery_minutes": 400,
+        "screen_score": 5.6, "warranty_months": 12,
+    },
+    # Lower mid, 27–36k RUB.
+    {
+        "brand": "HP", "model_name": "250 G9", "slug": "hp-250-g9",
+        "os": "windows", "form_factor": "laptop", "price_minor": 27_990_00,
+        "cpu_score": 3_300, "ram_gb": 8, "weight_g": 1_740, "battery_minutes": 380,
+        "screen_score": 5.8, "warranty_months": 12,
+    },
+    {
+        "brand": "Acer", "model_name": "Extensa 15", "slug": "acer-extensa-15",
+        "os": "windows", "form_factor": "laptop", "price_minor": 29_490_00,
+        "cpu_score": 3_000, "ram_gb": 8, "weight_g": 1_700, "battery_minutes": 360,
+        "screen_score": 5.5, "warranty_months": 12,
+    },
+    {
+        "brand": "ASUS", "model_name": "VivoBook 15 X1504", "slug": "asus-vivobook-15-x1504",
+        "os": "windows", "form_factor": "laptop", "price_minor": 32_990_00,
+        "cpu_score": 3_300, "ram_gb": 8, "weight_g": 1_700, "battery_minutes": 420,
+        "screen_score": 6.0, "warranty_months": 24,
+    },
+    {
+        "brand": "Lenovo", "model_name": "IdeaPad 3 15", "slug": "lenovo-ideapad-3-15",
+        "os": "windows", "form_factor": "laptop", "price_minor": 34_990_00,
+        "cpu_score": 3_300, "ram_gb": 16, "weight_g": 1_630, "battery_minutes": 420,
+        "screen_score": 6.1, "warranty_months": 24,
+    },
+    {
+        "brand": "Honor", "model_name": "MagicBook X 15", "slug": "honor-magicbook-x-15",
+        "os": "windows", "form_factor": "laptop", "price_minor": 35_990_00,
+        "cpu_score": 3_000, "ram_gb": 8, "weight_g": 1_540, "battery_minutes": 480,
+        "screen_score": 6.3, "warranty_months": 12,
+    },
+    # Upper mid, 40–53k RUB.
+    {
+        "brand": "Xiaomi", "model_name": "RedmiBook 15", "slug": "xiaomi-redmibook-15",
+        "os": "windows", "form_factor": "laptop", "price_minor": 39_990_00,
+        "cpu_score": 3_000, "ram_gb": 8, "weight_g": 1_800, "battery_minutes": 480,
+        "screen_score": 6.2, "warranty_months": 12,
+    },
+    {
+        "brand": "Acer", "model_name": "Aspire 5", "slug": "acer-aspire-5",
+        "os": "windows", "form_factor": "laptop", "price_minor": 44_990_00,
+        "cpu_score": 4_800, "ram_gb": 16, "weight_g": 1_760, "battery_minutes": 420,
+        "screen_score": 6.6, "warranty_months": 12,
+    },
+    {
+        "brand": "HP", "model_name": "15s", "slug": "hp-15s",
+        "os": "windows", "form_factor": "laptop", "price_minor": 47_990_00,
+        "cpu_score": 4_800, "ram_gb": 8, "weight_g": 1_690, "battery_minutes": 420,
+        "screen_score": 6.0, "warranty_months": 12,
+    },
+    {
+        "brand": "ASUS", "model_name": "VivoBook 16", "slug": "asus-vivobook-16",
+        "os": "windows", "form_factor": "laptop", "price_minor": 49_990_00,
+        "cpu_score": 5_300, "ram_gb": 16, "weight_g": 1_880, "battery_minutes": 480,
+        "screen_score": 7.0, "warranty_months": 24,
+    },
+    {
+        "brand": "Lenovo", "model_name": "IdeaPad Slim 3", "slug": "lenovo-ideapad-slim-3",
+        "os": "windows", "form_factor": "laptop", "price_minor": 52_990_00,
+        "cpu_score": 5_100, "ram_gb": 16, "weight_g": 1_620, "battery_minutes": 540,
+        "screen_score": 6.8, "warranty_months": 24,
+    },
+    # Upper mid, 58–70k RUB.
+    {
+        "brand": "Dell", "model_name": "Inspiron 15 3520", "slug": "dell-inspiron-15-3520",
+        "os": "windows", "form_factor": "laptop", "price_minor": 57_990_00,
+        "cpu_score": 4_800, "ram_gb": 16, "weight_g": 1_650, "battery_minutes": 420,
+        "screen_score": 6.4, "warranty_months": 12,
+    },
+    {
+        "brand": "Huawei", "model_name": "MateBook D 15", "slug": "huawei-matebook-d-15",
+        "os": "windows", "form_factor": "laptop", "price_minor": 59_990_00,
+        "cpu_score": 5_000, "ram_gb": 16, "weight_g": 1_560, "battery_minutes": 480,
+        "screen_score": 7.1, "warranty_months": 12,
+    },
+    {
+        "brand": "MSI", "model_name": "Modern 14", "slug": "msi-modern-14",
+        "os": "windows", "form_factor": "ultrabook", "price_minor": 64_990_00,
+        "cpu_score": 5_300, "ram_gb": 16, "weight_g": 1_400, "battery_minutes": 480,
+        "screen_score": 7.0, "warranty_months": 24,
+    },
+    {
+        "brand": "Acer", "model_name": "Swift 3", "slug": "acer-swift-3",
+        "os": "windows", "form_factor": "ultrabook", "price_minor": 69_990_00,
+        "cpu_score": 6_200, "ram_gb": 16, "weight_g": 1_200, "battery_minutes": 540,
+        "screen_score": 7.4, "warranty_months": 24,
     },
 ]

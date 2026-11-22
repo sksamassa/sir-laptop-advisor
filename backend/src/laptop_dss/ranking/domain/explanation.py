@@ -29,10 +29,17 @@ def build_reason(
     best_key, best_value = ranked[0]
     worst_key, worst_value = ranked[-1]
 
-    if abs(best_value) < 1e-12:
+    if abs(best_value) < 1e-12 and abs(worst_value) < 1e-12:
         return (
             f"{model_name}: все модели в выборке равны по выбранным критериям, "
             "порядок определён стабильным правилом."
+        )
+
+    if best_value <= 1e-12:
+        # Every criterion pulled the model down; saying "all equal" would be wrong.
+        return (
+            f"{model_name}: ни один критерий не дал преимущества; "
+            f"слабее всего — «{_label(registry, worst_key)}»."
         )
 
     if rank == 1:

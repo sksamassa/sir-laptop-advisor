@@ -39,6 +39,9 @@ e2e:
 criteria-test:
 	cd frontend && npm run test:criteria
 
+import-prices:
+	cd backend && $(PY) -m laptop_dss.catalog.adapters.import_catalog $(CSV)
+
 gen-criteria:
 	node shared/criteria.codegen.mjs
 

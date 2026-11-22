@@ -1,4 +1,4 @@
-# Laptop Selection DSS — SIR service
+﻿# Laptop Selection DSS — SIR service
 
 Сервис поддержки принятия решений для выбора ноутбука методом SIR
 (Superiority and Inferiority Ranking) по семи критериям, с объяснением каждого
@@ -16,7 +16,8 @@ API contract, tasks).
 | Backend API: catalog, auth, profiles, rankings, replay, comparison, admin | Implemented |
 | PostgreSQL schema + versioned SQL migrations | Implemented (`backend/migrations`) |
 | In-process event bus with idempotent replay (`processed_events`) | Implemented |
-| Executable acceptance checks (25, incl. HTTP against PostgreSQL) | **Passing** (see `docs/validation.md`) |
+| Executable acceptance checks (26, incl. HTTP against PostgreSQL) | **Passing** (see `docs/validation.md`) |
+| Catalog | 36 models, **15 990 – 199 990 ₽**, indicative retail snapshot |
 | Domain statement coverage | **96.3%** (gate 80%) via `make coverage` |
 | Browser tests | **4/4** Playwright scenarios on system Edge (`make e2e`) |
 | Performance: 5 000 models ranked in ~220 ms (p95 261 ms) | **Passing** (`backend/tests/perf/`) |
@@ -52,6 +53,23 @@ Production: `npm run build && npm start`. The UI is Russian-only, responsive fro
 
 Demo maintainer comes from `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`
 (defaults `admin@example.com` / `admin-password-12`; change them).
+
+## Loading real prices
+
+The seeded catalog is an indicative retail snapshot (36 models, 15 990–199 990 ₽),
+not a live feed — the spec keeps price scraping out of scope. To run on real market
+data, export a CSV with the documented columns and import it; the import is
+idempotent by `(brand, model_name)`, so re-running updates prices instead of
+duplicating models:
+
+```bash
+make import-prices CSV=backend/fixtures/prices.example.csv
+# or: python -m laptop_dss.catalog.adapters.import_catalog prices.csv
+```
+
+Columns: `brand,model_name,os,form_factor,price_rub,cpu_score,ram_gb,weight_g,battery_minutes,screen_score,warranty_months`.
+Invalid rows are reported by line number and skipped, and the command exits non-zero
+if any row failed.
 
 ## Verify
 

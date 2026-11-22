@@ -64,6 +64,9 @@ export default function CatalogPage() {
         <p className="mt-2 max-w-2xl text-sm text-[#a7adcd]">
           Все активные модели с семью критериями. Фильтры сужают каталог, порядок остаётся по цене.
         </p>
+        <p className="mt-1 max-w-2xl text-xs text-[#6f7699]">
+          Демонстрационный снимок ориентировочных розничных цен (ноябрь 2026), а не поток живых цен.
+        </p>
       </div>
 
       <Panel>
