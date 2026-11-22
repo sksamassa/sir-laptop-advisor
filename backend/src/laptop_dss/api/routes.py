@@ -277,7 +277,14 @@ def ranking_history(
 
 
 @router.get("/rankings/{ranking_id}")
-def replay(ranking_id: uuid.UUID, user: dict[str, Any] = Depends(deps.require_user)) -> dict[str, Any]:
+def replay(
+    ranking_id: uuid.UUID,
+    brand: str | None = None,
+    os: str | None = None,
+    form_factor: str | None = None,
+    max_price_minor: int | None = Query(default=None, ge=1),
+    user: dict[str, Any] = Depends(deps.require_user),
+) -> dict[str, Any]:
     stored = ranking_repo.get_ranking(ranking_id)
     if stored is None:
         raise NotFound("Ранжирование не найдено")
@@ -285,6 +292,33 @@ def replay(ranking_id: uuid.UUID, user: dict[str, Any] = Depends(deps.require_us
         raise NotFound("Ранжирование не найдено")
     payload = rank_laptops.replay_ranking(ranking_id)
     assert payload is not None
+
+    # FR-009: narrow a stored ranking for display. This is a post-hoc filter over
+    # the stored items, never a re-ranking: SIR order and original ranks are kept,
+    # which is the only way "preserve the SIR order" can hold given that
+    # normalization depends on the candidate pool.
+    filters = {
+        "brand": brand.lower() if brand else None,
+        "os": os,
+        "form_factor": form_factor,
+        "max_price_minor": max_price_minor,
+    }
+    if any(value is not None for value in filters.values()):
+        payload["items"] = [
+            item
+            for item in payload["items"]
+            if (filters["brand"] is None or item["model"]["brand"].lower() == filters["brand"])
+            and (filters["os"] is None or item["model"]["os"] == filters["os"])
+            and (
+                filters["form_factor"] is None
+                or item["model"]["form_factor"] == filters["form_factor"]
+            )
+            and (
+                filters["max_price_minor"] is None
+                or item["model"]["price_minor"] <= filters["max_price_minor"]
+            )
+        ]
+        payload["filtered_from"] = stored["candidate_count"]
     return payload
 
 

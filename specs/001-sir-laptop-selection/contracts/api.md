@@ -131,6 +131,11 @@ Returns the stored ranking in the same shape as the `POST` response plus
 `created_at`, `preferences`, and `catalog_snapshot_version`. A stored ranking is replayed
 from its snapshot; it does not reflect later catalog edits.
 
+Optional display filters: `brand`, `os`, `form_factor`, `max_price_minor`. They narrow the
+returned `items` **without re-ranking**: stored SIR order and the original `rank` values are
+preserved, and `filtered_from` reports the pre-filter candidate count. This is deliberate —
+re-running SIR on a subset would change normalization and could reorder results.
+
 ### `POST /rankings/{id}/comparison`
 
 ```json

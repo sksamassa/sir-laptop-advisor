@@ -1,4 +1,4 @@
----
+﻿---
 
 description: "Task list for the SIR-Based Laptop Selection Service"
 ---
@@ -299,7 +299,7 @@ Task: "Profile form in frontend/src/features/profile/ProfileForm.tsx"
 ## Implementation Status (2026-11-22)
 
 Checked: **54 of 74** tasks. Verified by
-`backend/tests/run_checks.py`: 21/21 checks pass against PostgreSQL 16
+`backend/tests/run_checks.py`: 22/22 checks pass against PostgreSQL 16
 (see `docs/validation.md`).
 
 **Environment-driven deviations (recorded, not silent):**

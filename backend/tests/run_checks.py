@@ -46,6 +46,7 @@ _API_CHECKS = {
     "register, login, profile save, and partial weight change",
     "ranking with saved weights uses them and is replayable",
     "replay is stable after the catalog changes",
+    "ranking filters preserve the stored SIR order",
     "comparison: 2-4 models, direction-aware best values",
     "maintainer can add, retire, and republish a model",
     "logout invalidates the session",
@@ -352,6 +353,21 @@ def _() -> None:
     retired = client.post(f"/api/v1/admin/models/{top_model}/retire")
     assert retired.status_code == 403, "a shopper must not retire models"
     CTX["protected_model"] = top_model
+
+
+@check("ranking filters preserve the stored SIR order")
+def _() -> None:
+    ranking_id = CTX["ranking_id"]
+    full = client.get(f"/api/v1/rankings/{ranking_id}").json()
+    brand = full["items"][0]["model"]["brand"]
+    filtered = client.get(f"/api/v1/rankings/{ranking_id}", params={"brand": brand}).json()
+    assert filtered["items"], "the filter must keep the matching models"
+    assert all(item["model"]["brand"].lower() == brand.lower() for item in filtered["items"])
+    expected = [
+        item["rank"] for item in full["items"] if item["model"]["brand"].lower() == brand.lower()
+    ]
+    assert [item["rank"] for item in filtered["items"]] == expected
+    assert filtered["filtered_from"] == full["candidate_count"]
 
 
 @check("comparison: 2-4 models, direction-aware best values")

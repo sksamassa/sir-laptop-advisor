@@ -16,7 +16,7 @@ API contract, tasks).
 | Backend API: catalog, auth, profiles, rankings, replay, comparison, admin | Implemented |
 | PostgreSQL schema + versioned SQL migrations | Implemented (`backend/migrations`) |
 | In-process event bus with idempotent replay (`processed_events`) | Implemented |
-| Executable acceptance checks (21, incl. HTTP against PostgreSQL) | **Passing** (see `docs/validation.md`) |
+| Executable acceptance checks (22, incl. HTTP against PostgreSQL) | **Passing** (see `docs/validation.md`) |
 | Performance: 5 000 models ranked in ~220 ms (p95 261 ms) | **Passing** (`backend/tests/perf/`) |
 | Next.js frontend (US1–US4 screens) | **Not implemented** — npm registry unreachable in this environment |
 | ruff / mypy / pytest gates | Configured, not run (packages unavailable offline) |
@@ -42,7 +42,7 @@ Demo maintainer comes from `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`
 ## Verify
 
 ```bash
-make test        # 21 acceptance checks; needs a reachable PostgreSQL
+make test        # 22 acceptance checks; needs a reachable PostgreSQL
 make test-unit   # SIR kernel checks only; no database required
 python backend/tests/perf/test_rank_5000.py   # performance budget check
 ```

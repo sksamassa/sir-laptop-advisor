@@ -22,12 +22,13 @@ ok    unknown fields are rejected with 422
 ok    register, login, profile save, and partial weight change
 ok    ranking with saved weights uses them and is replayable
 ok    replay is stable after the catalog changes
+ok    ranking filters preserve the stored SIR order
 ok    comparison: 2-4 models, direction-aware best values
 ok    maintainer can add, retire, and republish a model
 ok    logout invalidates the session
 ok    event handlers are idempotent on replay
 
-21 checks passed, 0 failed
+22 checks passed, 0 failed
 ```
 
 ## Performance (SC-004)
@@ -54,8 +55,8 @@ PASS
   weight contract (0.5% input tolerance → exact normalization), strict input
   validation (`extra="forbid"`), ownership and role checks.
 - **Spec coverage exercised over HTTP**: FR-003, FR-005, FR-006, FR-007,
-  FR-008, FR-010, FR-011 … FR-016, plus the empty-budget and invalid-weight
-  edge cases.
+  FR-008, FR-009 (display filters preserve stored order), FR-010, FR-011 …
+  FR-016, plus the empty-budget and invalid-weight edge cases.
 
 ## Not yet validated
 
