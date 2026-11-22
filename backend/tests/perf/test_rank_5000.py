@@ -15,7 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "src"), str(ROOT), str(ROOT / "tests")]
 
-from laptop_dss.catalog.domain.criteria import load_registry  # noqa: E402
+from laptop_dss.catalog.adapters.criteria_source import load_registry  # noqa: E402
 from laptop_dss.ranking.adapters import vectorized_sir  # noqa: E402
 from helpers import random_models, uniform_weights  # noqa: E402
 

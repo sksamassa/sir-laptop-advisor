@@ -24,7 +24,7 @@ os.environ["RATE_LIMIT_DISABLED"] = "1"
 
 from fastapi.testclient import TestClient  # noqa: E402
 
-from laptop_dss.catalog.domain.criteria import load_registry  # noqa: E402
+from laptop_dss.catalog.adapters.criteria_source import load_registry  # noqa: E402
 from laptop_dss.main import app, seed_demo  # noqa: E402
 from laptop_dss.profiles.domain.weights import WeightSet  # noqa: E402
 from laptop_dss.ranking.adapters import vectorized_sir  # noqa: E402
@@ -374,6 +374,10 @@ def _() -> None:
         total = sum(c["contribution"] for c in item["contributions"].values())
         assert abs(total - item["net_score"]) < 1e-6, (total, item["net_score"])
         assert item["reason"]
+    assert payload["items"][0]["gap_to_top"] is None
+    second = payload["items"][1]
+    assert second["gap_to_top"]["gap"] < 0
+    assert isinstance(second["gap_to_top"]["decisive_criteria"], list)
     again = client.post(
         "/api/v1/rankings",
         json={"budget_minor": 100_000_00, "goals": ["study", "development"]},
@@ -519,6 +523,7 @@ def _() -> None:
     replay = stored.json()
     assert replay["preferences"]["weights"]["battery"] == 0.4
     assert [item["rank"] for item in replay["items"]] == [item["rank"] for item in payload["items"]]
+    assert replay["items"][1]["gap_to_top"]["gap"] < 0
 
 
 @check("replay is stable after the catalog changes")

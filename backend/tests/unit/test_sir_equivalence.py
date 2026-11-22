@@ -6,7 +6,8 @@ import dataclasses
 
 import pytest
 
-from laptop_dss.catalog.domain.criteria import CriteriaRegistry, load_registry
+from laptop_dss.catalog.domain.criteria import CriteriaRegistry
+from laptop_dss.catalog.adapters.criteria_source import load_registry
 from laptop_dss.ranking.adapters import vectorized_sir
 from laptop_dss.ranking.domain import sir_reference
 from tests.conftest import random_models, uniform_weights

@@ -21,7 +21,7 @@ from laptop_dss.api.schemas import (
     RegisterRequest,
 )
 from laptop_dss.catalog.adapters import repository as catalog_repo
-from laptop_dss.catalog.domain.criteria import load_registry
+from laptop_dss.catalog.adapters.criteria_source import load_registry
 from laptop_dss.config import load_settings
 from laptop_dss.profiles.adapters import auth
 from laptop_dss.profiles.domain.weights import WeightSet

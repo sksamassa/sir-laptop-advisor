@@ -16,9 +16,10 @@ API contract, tasks).
 | Backend API: catalog, auth, profiles, rankings, replay, comparison, admin | Implemented |
 | PostgreSQL schema + versioned SQL migrations | Implemented (`backend/migrations`) |
 | In-process event bus with idempotent replay (`processed_events`) | Implemented |
+| Constitution | **v1.1.0** — migration tooling amendment (ADR 0004) |
 | Executable acceptance checks (28, incl. HTTP against PostgreSQL) | **Passing** (see `docs/validation.md`) |
 | Catalog | 36 models, **15 990 – 199 990 ₽**, indicative retail snapshot |
-| Domain statement coverage | **96.3%** (gate 80%) via `make coverage` |
+| Domain statement coverage | **97.8%** (gate 80%) via `make coverage` |
 | Browser tests | **4/4** Playwright scenarios on system Edge (`make e2e`) |
 | Performance: 5 000 models ranked in ~220 ms (p95 261 ms) | **Passing** (`backend/tests/perf/`) |
 | Next.js 15 frontend (US1–US4: ranking, details, compare, catalog, profile) | **Implemented** — `next build` passes; verified in headless Edge |

@@ -13,11 +13,11 @@ import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 
+from laptop_dss.catalog.adapters.criteria_source import load_registry
 from laptop_dss.catalog.domain.criteria import (
     CriteriaRegistry,
     Criterion,
     RegistryError,
-    load_registry,
 )
 from laptop_dss.catalog.domain.device import CriterionValues, DeviceModel
 from laptop_dss.profiles.domain.weights import WeightSet
@@ -242,6 +242,53 @@ def run_edge_cases() -> None:
 
     payload = explanation.contribution_payload(plain.contributions)
     assert set(payload) == set(plain.contributions)
+
+    # ---- profile entities ------------------------------------------------
+    from laptop_dss.profiles.domain.entities import Profile, Session, User
+
+    assert User(id=uuid.uuid4(), email="  Student@Example.COM ").email == "student@example.com"
+    for bad in (
+        {"email": "not-an-email"},
+        {"email": "student@example.com", "role": "admin"},
+    ):
+        try:
+            User(id=uuid.uuid4(), **bad)
+        except errors.ValidationError:
+            pass
+        else:
+            raise AssertionError(f"invalid user must be rejected: {bad}")
+
+    try:
+        Session(user_id=uuid.uuid4(), token_hash=b"short", absolute_expires_at=datetime.now(UTC))
+    except errors.ValidationError:
+        pass
+    else:
+        raise AssertionError("a non-SHA256 token hash must be rejected")
+
+    try:
+        Session(
+            user_id=uuid.uuid4(),
+            token_hash=b"0" * 32,
+            absolute_expires_at=datetime.now(),
+        )
+    except errors.ValidationError:
+        pass
+    else:
+        raise AssertionError("a naive expiry must be rejected")
+
+    valid_weights = WeightSet.from_user_input({key: 1 / 7 for key in keys}, keys)
+    for kwargs in (
+        {"goals": (), "budget_minor": 100_000_00},
+        {"goals": ("study",), "budget_minor": 0},
+    ):
+        try:
+            Profile(user_id=uuid.uuid4(), weights=valid_weights, **kwargs)
+        except errors.ValidationError:
+            pass
+        else:
+            raise AssertionError(f"invalid profile must be rejected: {kwargs}")
+
+    Profile(user_id=uuid.uuid4(), goals=("study",), budget_minor=100_000_00, weights=valid_weights)
 
 
 def registry_probe_path() -> str:

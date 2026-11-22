@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   ApiError,
@@ -53,6 +53,20 @@ export function RankingWorkspace() {
   const [compareLoading, setCompareLoading] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [useSavedWeights, setUseSavedWeights] = useState(false);
+  const [recomputeNeeded, setRecomputeNeeded] = useState(false);
+
+  // A ranking is only valid for the inputs that produced it: changing budget,
+  // goals, or weights must never leave a stale result on screen.
+  const inputsSignature = JSON.stringify({ budgetRub, goals, weights });
+  const lastSignature = useRef(inputsSignature);
+  useEffect(() => {
+    if (lastSignature.current !== inputsSignature && result) {
+      setResult(null);
+      setSelected([]);
+      setRecomputeNeeded(true);
+    }
+    lastSignature.current = inputsSignature;
+  }, [inputsSignature, result]);
 
   useEffect(() => {
     me()
@@ -112,6 +126,7 @@ export function RankingWorkspace() {
     setLoading(true);
     setError(null);
     setSelected([]);
+    setRecomputeNeeded(false);
     try {
       const usingSaved = authenticated && useSavedWeights;
       const payload = await createRanking({
@@ -213,7 +228,7 @@ export function RankingWorkspace() {
 
           <details className="rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2">
             <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider text-[#8f96bd]">
-              Мягкие предпочтения
+              Пожелания (не влияют на рейтинг)
             </summary>
             <div className="mt-3 space-y-3">
               <div>
@@ -294,6 +309,14 @@ export function RankingWorkspace() {
       </Panel>
 
       <div className="space-y-4">
+        {recomputeNeeded ? (
+          <div
+            role="status"
+            className="rounded-xl border border-[#ffb3bf]/30 bg-[#ffb3bf]/10 px-3.5 py-2.5 text-sm text-[#ffb3bf]"
+          >
+            Параметры изменились — нажмите «Подобрать ноутбук», чтобы пересчитать рейтинг.
+          </div>
+        ) : null}
         {result ? (
           <div className="card flex flex-wrap items-center justify-between gap-3 px-5 py-4">
             <div>

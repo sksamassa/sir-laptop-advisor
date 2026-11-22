@@ -1,22 +1,20 @@
-"""Criteria registry: the single definition of the seven SIR criteria.
+"""Criteria registry: the immutable definition of the seven SIR criteria.
 
-The JSON file is the source of truth; this loader validates it and exposes an
-immutable registry whose content hash is stored with every ranking so a result
-can be tied to the exact criteria definition that produced it.
+This module is pure domain: it validates a parsed mapping and exposes value
+objects. Reading the JSON file, caching, and environment lookup live in
+``catalog/adapters/criteria_source.py`` so the domain performs no I/O
+(constitution, Principle II).
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
-import os
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, Literal
 
 Direction = Literal["min", "max"]
 CRITERIA_COUNT = 7
-_REPO_ROOT = Path(__file__).resolve().parents[5]
 
 
 class RegistryError(ValueError):
@@ -73,15 +71,13 @@ class CriteriaRegistry:
         missing = set(self.keys) - set(weights)
         extra = set(weights) - set(self.keys)
         if missing or extra:
-            raise RegistryError(f"weights must cover exactly {self.keys}; missing={missing}, extra={extra}")
+            raise RegistryError(
+                f"weights must cover exactly {self.keys}; missing={missing}, extra={extra}"
+            )
 
 
-def _default_path() -> Path:
-    override = os.environ.get("CRITERIA_PATH")
-    return Path(override) if override else _REPO_ROOT / "shared" / "criteria.json"
-
-
-def _parse(raw: dict[str, Any]) -> CriteriaRegistry:
+def parse_registry(raw: dict[str, Any]) -> CriteriaRegistry:
+    """Validate a parsed registry mapping and build the immutable registry."""
     items = [Criterion(**item) for item in raw["criteria"]]
     if len(items) != CRITERIA_COUNT:
         raise RegistryError(f"expected exactly {CRITERIA_COUNT} criteria, got {len(items)}")
@@ -103,28 +99,3 @@ def _parse(raw: dict[str, Any]) -> CriteriaRegistry:
         form_factors=tuple(vocab["form_factor"]),
         content_hash="sha256:" + hashlib.sha256(payload).hexdigest(),
     )
-
-
-_registry: CriteriaRegistry | None = None
-
-
-def load_registry(path: Path | None = None) -> CriteriaRegistry:
-    """Load and validate the registry (cached per process)."""
-    global _registry
-    if path is None and _registry is not None:
-        return _registry
-    target = path or _default_path()
-    try:
-        raw = json.loads(target.read_text(encoding="utf-8"))
-    except FileNotFoundError as exc:
-        raise RegistryError(f"criteria registry not found at {target}") from exc
-    registry = _parse(raw)
-    if path is None:
-        _registry = registry
-    return registry
-
-
-def reset_registry_cache() -> None:
-    """Test helper: drop the process cache."""
-    global _registry
-    _registry = None

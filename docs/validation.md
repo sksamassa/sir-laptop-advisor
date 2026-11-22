@@ -40,6 +40,8 @@ ok    event handlers are idempotent on replay
 ## UI validation
 
 - `cd frontend && npx tsc --noEmit` — clean.
+- The detail panel shows **"До лидера"** for every rank ≥ 2, and the soft-preference block is
+  labelled **"Пожелания (не влияют на рейтинг)"**.
 - `npm run build` — 4 routes, prerendered; First Load JS 103–110 kB.
 - Interactive flow in headless Edge over the DevTools protocol
   (`frontend/scripts/capture.mjs`): submit → 8 ranked cards with Russian reasons →
@@ -77,18 +79,19 @@ threshold pairs, exactly seven criteria in order).
 pytest-cov cannot be installed):
 
 ```text
+100.0%  catalog/domain/criteria.py          (77/77)
 100.0%  catalog/domain/device.py            (42/42)
- 90.8%  catalog/domain/criteria.py          (79/87)
+100.0%  profiles/domain/entities.py         (39/39)
+ 97.1%  profiles/domain/weights.py          (34/35)
+ 95.3%  ranking/domain/explanation.py       (41/43)
 100.0%  ranking/domain/normalization.py     (29/29)
 100.0%  ranking/domain/preference.py        (13/13)
  98.4%  ranking/domain/sir_reference.py     (61/62)
- 95.1%  ranking/domain/explanation.py       (39/41)
- 97.1%  profiles/domain/weights.py          (34/35)
-100.0%  shared/domain/errors.py             (39/39)
+100.0%  shared/domain/errors.py             (43/43)
 100.0%  shared/domain/ids.py                (18/18)
  85.7%  shared/domain/money.py              (12/14)
 
-domain statement coverage: 96.3% (366/380) — PASS (gate 80%)
+domain statement coverage: 97.8% (393/402) — PASS (gate 80%)
 ```
 
 ## Performance (SC-004)

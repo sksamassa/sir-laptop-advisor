@@ -127,7 +127,7 @@ ranking: saved weights apply without re-entry and only that user's profile is re
 
 ### Implementation for User Story 2
 
-- [ ] T045 [US2] Implement the profiles domain: `User` (email, Argon2id hash, `role`), `Session` (hashed token, idle and absolute expiry), `Profile`, and `WeightSet`, in `backend/src/laptop_dss/profiles/domain/{user.py,session.py,profile.py,weights.py`
+- [x] T045 [US2] Implement the profiles domain: `User` (email, Argon2id hash, `role`), `Session` (hashed token, idle and absolute expiry), `Profile`, and `WeightSet`, in `backend/src/laptop_dss/profiles/domain/{user.py,session.py,profile.py,weights.py`
 - [x] T046 [US2] Implement Argon2id hashing and verification in `backend/src/laptop_dss/profiles/adapters/password.py`
 - [x] T047 [US2] Implement session issuance, SHA-256 token storage, cookie setting, and the `get_current_user` dependency in `backend/src/laptop_dss/profiles/adapters/sessions.py`
 - [x] T048 [US2] Implement the `register`, `login`, `logout`, and `me` use cases in `backend/src/laptop_dss/profiles/application/{register.py,login.py,logout.py,me.py`
@@ -339,12 +339,32 @@ conventions are implemented locally.
 > remaining gaps; the status summary above predates this phase and still counts 74 tasks.
 > CRITICAL items T075–T076 are constitution debts, not feature regressions.
 
-- [ ] T075 Adopt Alembic for schema migrations, or amend Constitution Principle II to permit the versioned SQL migrator, and record the decision per Constitution II (contradicts)
-- [ ] T076 Move criteria registry file loading out of `backend/src/laptop_dss/catalog/domain/criteria.py` into an adapter, leaving only validation in the domain per Constitution II (contradicts)
-- [ ] T077 Expose the score gap and the criteria responsible for it in the ranking API and the model detail view, using `ranking/domain/explanation.py::gap_to_top` per US4/AC2 (missing)
+- [x] T075 Adopt Alembic for schema migrations, or amend Constitution Principle II to permit the versioned SQL migrator, and record the decision per Constitution II (contradicts)
+- [x] T076 Move criteria registry file loading out of `backend/src/laptop_dss/catalog/domain/criteria.py` into an adapter, leaving only validation in the domain per Constitution II (contradicts)
+- [x] T077 Expose the score gap and the criteria responsible for it in the ranking API and the model detail view, using `ranking/domain/explanation.py::gap_to_top` per US4/AC2 (missing)
 - [ ] T078 Run ruff, mypy --strict, and ESLint in CI and fix every reported violation per Constitution III (partial)
-- [ ] T079 Decide and implement how soft preferences (brand, OS, form factor) affect ranking, or document them explicitly as display-only per FR-001 and US1 (partial)
-- [ ] T080 Reconcile the "model lacks a criterion value" edge case with the `NOT NULL` schema: allow incomplete drafts that are excluded and flagged, or remove the edge case per spec edge case (contradicts)
-- [ ] T081 Promote `User`, `Session`, and `Profile` to rich domain entities with their invariants per T045 (partial)
-- [ ] T082 Invalidate or recompute the displayed ranking when budget or weights change after results are shown per spec edge case "changes preferences after viewing results" (partial)
-- [ ] T083 Record the live catalog sources, CSV importer, and guest-capability access in an ADR and plan note per plan decision on catalog maintenance (unrequested)
+- [x] T079 Decide and implement how soft preferences (brand, OS, form factor) affect ranking, or document them explicitly as display-only per FR-001 and US1 (partial)
+- [x] T080 Reconcile the "model lacks a criterion value" edge case with the `NOT NULL` schema: allow incomplete drafts that are excluded and flagged, or remove the edge case per spec edge case (contradicts)
+- [x] T081 Promote `User`, `Session`, and `Profile` to rich domain entities with their invariants per T045 (partial)
+- [x] T082 Invalidate or recompute the displayed ranking when budget or weights change after results are shown per spec edge case "changes preferences after viewing results" (partial)
+- [x] T083 Record the live catalog sources, CSV importer, and guest-capability access in an ADR and plan note per plan decision on catalog maintenance (unrequested)
+
+## Phase 8 Outcomes (2026-11-22)
+
+Status: **82 of 83** tasks checked; open: T078.
+
+- T075 — constitution amended to **v1.1.0**: versioned, once-applied migrations are
+  mandatory, and the repository SQL migrator is permitted where Alembic cannot be
+  installed (ADR 0004).
+- T076 — the criteria loader moved to `catalog/adapters/criteria_source.py`; the domain
+  only validates a parsed mapping and performs no I/O.
+- T077 — `gap_to_top` (score gap plus responsible criteria) is returned for every rank ≥ 2
+  and shown in the detail panel as "До лидера".
+- T079 — soft preferences are labelled and documented as not affecting the SIR score.
+- T080 — publishing requires all seven values, so the "excluded for missing data" state is
+  impossible; the spec edge case is reconciled.
+- T081 — `User`, `Session`, `Profile` are rich entities with invariants used by the use cases.
+- T082 — changing budget, goals, or weights clears a stale ranking and prompts a recount.
+- T083 — ADR 0003 records the catalog source chain, CSV fallback, and guest capability.
+- T078 remains open: ruff, mypy --strict, and ESLint need packages this environment cannot
+  install; the gates are configured in CI and unproven until CI runs them.

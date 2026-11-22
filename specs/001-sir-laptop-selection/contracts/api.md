@@ -82,8 +82,10 @@ Request (guest form; fields marked `?` are optional):
 
 - `weights` may be omitted: a guest receives an equal-weight default; an authenticated caller
   with `use_saved_weights: true` receives the saved profile weights.
-- `preferred_brand`, `preferred_os`, `form_factor` are *soft* preferences recorded with the
-  request; hard filtering uses `budget_minor`. (Browsing filters are hard on `/models`.)
+- `preferred_brand`, `preferred_os`, `form_factor` are *soft* preferences: recorded with the
+  request (and in the stored ranking) but they neither filter the candidate set nor change
+  the SIR score. Hard filtering uses `budget_minor`; browse filters are hard on `/models`
+  and on `GET /rankings/{id}`.
 
 Response `201`:
 
@@ -128,6 +130,10 @@ Contract rules:
    `cheapest_price_minor`: the lowest active catalog price (or `null` when the catalog
    is empty), so the interface can tell the shopper what budget would find something.
 5. Weights outside the allowed tolerance return `400 invalid_weights` before any ranking.
+6. Every item ranked 2 and below carries `gap_to_top`:
+   `{ "gap": -0.42, "decisive_criteria": [{ "criterion": "price", "delta": -0.31 }],
+   "strongest_criteria": [...] }`, derived from the stored contributions compared with
+   rank 1. Rank 1 carries `null`. The same object appears on replay.
 
 ### `GET /rankings/{id}`
 

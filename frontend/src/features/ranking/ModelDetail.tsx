@@ -3,6 +3,11 @@
 import type { Criterion, RankingItem } from "@/lib/api";
 import { formatSigned } from "@/lib/format";
 
+function labelFor(criteria: Criterion[], key: string): string {
+  const label = criteria.find((criterion) => criterion.key === key)?.label_ru ?? key;
+  return label.charAt(0).toLowerCase() + label.slice(1);
+}
+
 export function ModelDetail({
   item,
   criteria,
@@ -73,6 +78,29 @@ export function ModelDetail({
           <div className="text-sm font-semibold text-[#3ddc97]">{item.net_score.toFixed(3)}</div>
         </div>
       </div>
+
+      {item.gap_to_top ? (
+        <div className="mt-3 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2.5">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#8f96bd]">
+            До лидера
+          </div>
+          <div className="mt-1 flex flex-wrap items-baseline gap-2">
+            <span className="text-sm font-semibold tabular-nums text-[#ffb3bf]">
+              {item.gap_to_top.gap.toFixed(3)}
+            </span>
+            <span className="text-xs text-[#a7adcd]">
+              {item.gap_to_top.decisive_criteria.length === 0
+                ? "лидер не опережает ни по одному критерию"
+                : item.gap_to_top.decisive_criteria
+                    .map(
+                      (entry) =>
+                        `${labelFor(criteria, entry.criterion)} ${entry.delta.toFixed(2)}`,
+                    )
+                    .join(" · ")}
+            </span>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

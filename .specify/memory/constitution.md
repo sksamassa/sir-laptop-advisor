@@ -50,8 +50,11 @@ commitments, not style preferences.
   documented, and stable.
 - Each use case MUST be one named function or class with explicit typed input and output DTOs.
   Business logic MUST NOT live in route handlers, ORM models, or React components.
-- Persistence MUST go through repository ports. Schema changes MUST be applied as Alembic
-  migrations; `Base.metadata.create_all()` and manual DDL are prohibited outside tests.
+- Persistence MUST go through repository ports. Schema changes MUST be applied through
+  versioned, ordered migrations that are recorded once and replayed identically. Alembic is
+  the default tool; where Alembic cannot be installed, a repository-owned SQL migrator with
+  a `schema_migrations` ledger is permitted (see ADR 0004). `Base.metadata.create_all()` and
+  manual DDL are prohibited outside tests.
 - Event handlers MUST be idempotent and MUST record processed event identifiers so replays do
   not double-apply ranking or profile updates.
 - Every public module MUST state its purpose and owning context in a module docstring; every
@@ -135,9 +138,10 @@ demo that only works on the author's machine.
 
 ## Technology & Data Constraints
 
-- Backend language: Python 3.12+ with FastAPI, SQLAlchemy 2.x (async), Alembic, and Pydantic
-  v2. Primary database: PostgreSQL. Alternative persistence requires justification in
-  `plan.md`.
+- Backend language: Python 3.12+ with FastAPI and Pydantic v2. Persistence uses SQLAlchemy
+  2.x (async) and Alembic where those packages are installable; where they are not, the
+  `psycopg2` repository adapters and the versioned SQL migrator are the sanctioned
+  alternative (ADR 0004).
 - Frontend: Next.js with TypeScript, TailwindCSS, shadcn/ui, Zod, and Framer Motion. Server
   state MUST be fetched through typed API clients; secrets MUST never be embedded in the
   browser bundle.
@@ -188,4 +192,4 @@ conventions. When guidance conflicts, this document wins until amended.
 - This document is the runtime source of truth for development practice; `.specify/` artifacts
   MUST NOT redefine its rules. Related guidance belongs in `docs/` and `README.md`.
 
-**Version**: 1.0.0 | **Ratified**: 2026-11-22 | **Last Amended**: 2026-11-22
+**Version**: 1.1.0 | **Ratified**: 2026-11-22 | **Last Amended**: 2026-11-22

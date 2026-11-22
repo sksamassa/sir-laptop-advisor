@@ -20,6 +20,9 @@ test.describe("SIR laptop selection", () => {
     await cards.first().getByRole("button", { name: "Почему так?" }).click();
     await expect(cards.first().getByText("ВКЛАД В ОЦЕНКУ")).toBeVisible();
     await expect(cards.first().getByText("Φ+", { exact: true })).toBeVisible();
+
+    await cards.nth(1).getByRole("button", { name: "Почему так?" }).click();
+    await expect(cards.nth(1).getByText("До лидера")).toBeVisible();
   });
 
   test("three models can be compared from the ranking", async ({ page }) => {

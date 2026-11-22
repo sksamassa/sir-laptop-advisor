@@ -6,7 +6,7 @@ import re
 import uuid
 from typing import Any, Mapping
 
-from laptop_dss.catalog.domain.criteria import load_registry
+from laptop_dss.catalog.adapters.criteria_source import load_registry
 from laptop_dss.catalog.domain.device import CriterionValues, DeviceModel
 from laptop_dss.shared.adapters import db
 

@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Any, Callable, Protocol
 
 from laptop_dss.catalog.adapters import repository as repo
-from laptop_dss.catalog.domain.criteria import load_registry
+from laptop_dss.catalog.adapters.criteria_source import load_registry
 from laptop_dss.catalog.domain.device import CriterionValues, DeviceModel
 from laptop_dss.shared.domain.errors import DomainError
 

@@ -186,3 +186,13 @@ See [research.md](./research.md). All technical unknowns are resolved there; no
 - **OneDrive-synced workspace on Windows**: file watching and Docker volume mounts can be
   slow; the compose file mounts source read-only and relies on rebuilds, and the quickstart
   documents running from a local clone if hot reload misbehaves.
+
+## Post-plan Addendum (2026-11-22)
+
+- **Catalog data sources**: live JSON feed → HTML selector config → CSV → bundled seed, with
+  per-row provenance and an admin refresh endpoint. See `docs/adr/0003-catalog-sources.md`.
+- **Migration tooling**: constitution v1.1.0 permits the repository's versioned SQL migrator
+  while Alembic cannot be installed; versioned, once-applied migrations remain mandatory.
+  See `docs/adr/0004-migration-tooling.md`.
+- **Gap-to-leader**: every item ranked 2+ now carries `gap_to_top` derived from the stored
+  contributions (US4/AC2), shown in the model detail panel.

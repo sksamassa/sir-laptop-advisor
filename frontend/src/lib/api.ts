@@ -44,6 +44,12 @@ export interface Contribution {
   contribution: number;
 }
 
+export interface GapToTop {
+  gap: number;
+  decisive_criteria: { criterion: string; delta: number }[];
+  strongest_criteria: { criterion: string; delta: number }[];
+}
+
 export interface RankingItem {
   rank: number;
   model: ModelSnapshot;
@@ -52,6 +58,7 @@ export interface RankingItem {
   phi_minus: number;
   contributions: Record<string, Contribution>;
   reason: string;
+  gap_to_top?: GapToTop | null;
 }
 
 export interface RankingResponse {

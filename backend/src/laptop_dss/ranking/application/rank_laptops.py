@@ -6,7 +6,8 @@ import uuid
 from typing import Any, Mapping, Sequence
 
 from laptop_dss.catalog.adapters import repository as catalog_repo
-from laptop_dss.catalog.domain.criteria import CriteriaRegistry, load_registry
+from laptop_dss.catalog.domain.criteria import CriteriaRegistry
+from laptop_dss.catalog.adapters.criteria_source import load_registry
 from laptop_dss.catalog.domain.device import DeviceModel
 from laptop_dss.profiles.domain.weights import WeightSet, default_weights
 from laptop_dss.ranking.adapters import repository as ranking_repo
@@ -130,8 +131,42 @@ def create_ranking(
         "algorithm_version": ALGORITHM_VERSION,
         "criteria_version": registry.content_hash,
         "candidate_count": total,
-        "items": [_public_item(item) for item in items],
+        "items": _attach_gaps([_public_item(item) for item in items]),
     }
+
+
+def _attach_gaps(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Add a gap-to-leader breakdown to every item ranked 2 and below.
+
+    Derived from the stored per-criterion contributions, so replay gets the same
+    explanation without another table.
+    """
+    if not items:
+        return items
+    top = items[0]
+    for item in items:
+        if item["rank"] == 1:
+            item["gap_to_top"] = None
+            continue
+        deltas: list[tuple[str, float]] = []
+        for key, contribution in item["contributions"].items():
+            top_contribution = top["contributions"].get(key)
+            if top_contribution is None:
+                continue
+            deltas.append(
+                (key, round(contribution["contribution"] - top_contribution["contribution"], 6))
+            )
+        deltas.sort(key=lambda pair: pair[1])
+        item["gap_to_top"] = {
+            "gap": round(item["net_score"] - top["net_score"], 6),
+            "decisive_criteria": [
+                {"criterion": key, "delta": delta} for key, delta in deltas[:2] if delta < 0
+            ],
+            "strongest_criteria": [
+                {"criterion": key, "delta": delta} for key, delta in deltas[-2:] if delta > 0
+            ],
+        }
+    return items
 
 
 def _public_item(item: Mapping[str, Any]) -> dict[str, Any]:
@@ -158,5 +193,5 @@ def replay_ranking(ranking_id: uuid.UUID) -> dict[str, Any] | None:
         "candidate_count": row["candidate_count"],
         "created_at": row["created_at"].isoformat(),
         "preferences": row["preferences"],
-        "items": [_public_item(item) for item in items],
+        "items": _attach_gaps([_public_item(item) for item in items]),
     }

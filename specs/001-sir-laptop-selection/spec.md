@@ -131,8 +131,9 @@ one hurt it most.
   alternative matched, rather than hiding the result.
 - **All eligible models share the same value for a criterion**: that criterion contributes
   nothing to the differences, and the ranking still produces a defined, stable order.
-- **A model lacks a value for one criterion**: the model is excluded from ranking and listed
-  with the missing data identified, so results never rest on invented values.
+- **A model cannot be published without values for all seven criteria**: the admin
+  endpoint rejects it with `422` and the schema is `NOT NULL` on every criterion, so a
+  ranked model always has complete data. There is no "excluded for missing data" state.
 - **Weights are zero, negative, or do not total 100%**: the service rejects the input before
   ranking and states what must be fixed.
 - **A shopper changes preferences after viewing results**: the displayed ranking is
@@ -248,6 +249,11 @@ one hurt it most.
   not sell, reserve, or process payments.
 - **Guest use**: a visitor can obtain a ranking without an account. Accounts exist to save
   profiles and weights.
+- **Soft preferences are display-only**: brand, operating-system, and form-factor
+  preferences are recorded with a ranking request and stored for future filtering, but they
+  do not affect eligibility or the SIR score in this release. Hard filtering is available
+  on the catalog and on stored rankings. This is stated in the interface so a shopper is
+  never misled into thinking an ignored preference changed the result.
 - **Language**: the interface is Russian-only for this release; the rubric, units, and
   criteria names are Russian.
 - **Data minimization**: only preferences and account identifiers are stored; no payment or

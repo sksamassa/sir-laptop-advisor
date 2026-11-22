@@ -75,11 +75,14 @@ await shot("02-results");
 
 const openedDetails = await evaluate(`
   (() => {
-    const button = [...document.querySelectorAll("button")].find(
+    const card = document.querySelectorAll("ol > li")[1];
+    if (!card) return false;
+    const button = [...card.querySelectorAll("button")].find(
       (node) => node.textContent.trim() === "Почему так?",
     );
     if (!button) return false;
     button.click();
+    card.scrollIntoView({ block: "center" });
     return true;
   })()
 `);

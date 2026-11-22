@@ -6,14 +6,16 @@ import hashlib
 import secrets
 import uuid
 from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError, VerifyMismatchError
 
-from laptop_dss.catalog.domain.criteria import load_registry
+from laptop_dss.catalog.adapters.criteria_source import load_registry
 from laptop_dss.config import load_settings
 from laptop_dss.profiles.adapters import repository as repo
+from laptop_dss.profiles.domain.entities import Profile, Session, User
 from laptop_dss.profiles.domain.weights import WeightSet
 from laptop_dss.shared.adapters import events
 from laptop_dss.shared.application.events import DomainEvent
@@ -40,12 +42,10 @@ def hash_password(password: str) -> str:
 
 
 def register(email: str, password: str) -> dict[str, Any]:
-    email = email.strip().lower()
-    if "@" not in email or len(email) > 254:
-        raise ValidationError("Некорректный адрес электронной почты")
-    if repo.find_user_by_email(email) is not None:
+    candidate = User(id=uuid.uuid4(), email=email, role="shopper")
+    if repo.find_user_by_email(candidate.email) is not None:
         raise Conflict("Пользователь с таким адресом уже существует")
-    return repo.create_user(email, hash_password(password))
+    return repo.create_user(candidate.email, hash_password(password))
 
 
 def login(email: str, password: str) -> IssuedSession:
@@ -57,9 +57,16 @@ def login(email: str, password: str) -> IssuedSession:
     except (VerifyMismatchError, VerificationError) as exc:
         raise Unauthorized("Неверный адрес или пароль") from exc
     token = secrets.token_urlsafe(32)
+    token_hash = _token_hash(token)
+    Session(
+        user_id=user["id"],
+        token_hash=token_hash,
+        absolute_expires_at=datetime.now(UTC)
+        + timedelta(days=settings.session_absolute_days),
+    )
     repo.create_session(
         user["id"],
-        _token_hash(token),
+        token_hash,
         idle_days=settings.session_idle_days,
         absolute_days=settings.session_absolute_days,
     )
@@ -109,13 +116,15 @@ def save_profile(
     partial: bool,
 ) -> dict[str, Any]:
     registry = load_registry()
-    if not goals:
-        raise ValidationError("Укажите хотя бы одну цель использования")
-    unknown = set(goals) - set(registry.goals)
+    profile = Profile(
+        user_id=uuid.UUID(user_id),
+        goals=tuple(goals),
+        budget_minor=budget_minor,
+        weights=weights,
+    )
+    unknown = set(profile.goals) - set(registry.goals)
     if unknown:
         raise ValidationError(f"Неизвестные цели: {', '.join(sorted(unknown))}")
-    if budget_minor <= 0 or budget_minor > 100_000_000:
-        raise ValidationError("Бюджет должен быть в пределах от 1 до 1 000 000 рублей")
     if preferred_os is not None and preferred_os not in registry.operating_systems:
         raise ValidationError("Недопустимая операционная система")
     if form_factor is not None and form_factor not in registry.form_factors:

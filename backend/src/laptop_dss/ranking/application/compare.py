@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from typing import Any, Sequence
 
-from laptop_dss.catalog.domain.criteria import load_registry
+from laptop_dss.catalog.adapters.criteria_source import load_registry
 from laptop_dss.ranking.adapters import repository as ranking_repo
 from laptop_dss.shared.domain.errors import Forbidden, NotFound, ValidationError
 
