@@ -27,9 +27,10 @@ ok    ranking filters preserve the stored SIR order
 ok    comparison: 2-4 models, direction-aware best values
 ok    maintainer can add, retire, and republish a model
 ok    logout invalidates the session
+ok    domain validation and error branches
 ok    event handlers are idempotent on replay
 
-23 checks passed, 0 failed
+24 checks passed, 0 failed
 ```
 
 ## UI validation
@@ -43,8 +44,44 @@ ok    event handlers are idempotent on replay
 - Screens: `01-form`, `02-results`, `03-details`, `04-selected`, `05-compare`,
   `06-mobile-catalog` (captured to the temp folder; not committed).
 
-**Not yet validated**: automated browser suite (Playwright), ESLint, and a full
-accessibility audit.
+**Not yet validated**: ESLint and a full accessibility audit.
+
+## Automated browser tests
+
+`cd frontend && npx playwright test` (Playwright drives the system Edge, no browser
+download needed):
+
+```text
+4 passed (14.0s)
+  ok  a guest receives a ranked, explained shortlist
+  ok  three models can be compared from the ranking
+  ok  catalog lists models and filters by operating system
+  ok  profile asks for sign-in when anonymous
+```
+
+Generated criteria constants are checked separately:
+`node frontend/tests/criteria.test.mjs` → **3/3** (keys, labels, directions,
+threshold pairs, exactly seven criteria in order).
+
+## Coverage
+
+`python backend/tests/coverage_report.py --full` (standard-library tracer, since
+pytest-cov cannot be installed):
+
+```text
+100.0%  catalog/domain/device.py            (42/42)
+ 90.8%  catalog/domain/criteria.py          (79/87)
+100.0%  ranking/domain/normalization.py     (29/29)
+100.0%  ranking/domain/preference.py        (13/13)
+ 98.4%  ranking/domain/sir_reference.py     (61/62)
+ 95.1%  ranking/domain/explanation.py       (39/41)
+ 97.1%  profiles/domain/weights.py          (34/35)
+100.0%  shared/domain/errors.py             (39/39)
+100.0%  shared/domain/ids.py                (18/18)
+ 85.7%  shared/domain/money.py              (12/14)
+
+domain statement coverage: 96.3% (366/380) — PASS (gate 80%)
+```
 
 ## Performance (SC-004)
 

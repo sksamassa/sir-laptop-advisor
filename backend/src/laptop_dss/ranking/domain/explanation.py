@@ -23,6 +23,8 @@ def build_reason(
     contributions = {
         key: value.contribution for key, value in score.contributions.items()
     }
+    if not contributions:
+        return f"{model_name}: недостаточно данных для объяснения."
     ranked = sorted(contributions.items(), key=lambda item: item[1], reverse=True)
     best_key, best_value = ranked[0]
     worst_key, worst_value = ranked[-1]
@@ -52,7 +54,12 @@ def gap_to_top(
     """Return the score gap and the criteria responsible for it."""
     deltas: list[tuple[str, float]] = []
     for key in registry.keys:
-        delta = other.contributions[key].contribution - top.contributions[key].contribution
+        top_entry = top.contributions.get(key)
+        other_entry = other.contributions.get(key)
+        if top_entry is None or other_entry is None:
+            # A stored ranking can predate a criterion; skip it instead of failing.
+            continue
+        delta = other_entry.contribution - top_entry.contribution
         deltas.append((key, delta))
     deltas.sort(key=lambda item: item[1])
     gap = other.net_score - top.net_score

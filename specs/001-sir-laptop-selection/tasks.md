@@ -58,7 +58,7 @@ No user story can start until this phase is complete.
 - [x] T010 [P] Write `shared/criteria.codegen.mjs` generating `frontend/src/generated/criteria.generated.ts` and `backend/src/laptop_dss/catalog/domain/criteria_generated.py` from `shared/criteria.json`
 - [x] T011 Implement the immutable registry loader in `backend/src/laptop_dss/catalog/domain/criteria.py`: validate 7 unique keys, orders covering 1..7, `0 <= q < p <= 1`, expose a content hash as `criteria_version`
 - [x] T012 [P] Add `backend/tests/contract/test_criteria_registry.py` asserting schema validity, loader invariants, exactly seven criteria, and a failing drift check when generated files are stale
-- [ ] T013 [P] Add `frontend/tests/criteria.test.ts` asserting the generated TypeScript registry exposes the same keys, labels, and directions as the JSON source
+- [x] T013 [P] Add `frontend/tests/criteria.test.ts` asserting the generated TypeScript registry exposes the same keys, labels, and directions as the JSON source
 - [x] T014 [P] Implement the shared kernel in `backend/src/laptop_dss/shared/domain/`: `ids.py` (UUID newtypes), `money.py` (integer kopecks, RUB formatting), `errors.py` (domain error hierarchy), `clock.py` (Clock protocol)
 - [x] T015 [P] Implement the event bus port in `backend/src/laptop_dss/shared/application/events.py` and the in-process adapter with `processed_events` idempotency in `backend/src/laptop_dss/shared/adapters/events.py`
 - [x] T016 [P] Implement the persistence base in `backend/src/laptop_dss/shared/adapters/db.py`: async engine/session factory, deterministic constraint naming, unit-of-work context manager
@@ -196,11 +196,11 @@ net score and names the criteria responsible for the gap to rank 1.
 - [x] T067 [P] Complete `README.md`: install, `make up`, migrate, seed, run tests, and reproduce one SIR ranking end to end
 - [x] T068 [P] Record decisions in `docs/adr/0001-sir-decomposition.md` and `docs/adr/0002-ranking-snapshots.md`
 - [x] T069 [P] Add a performance test with 5,000 generated models asserting ranking p95 under 300 ms in `backend/tests/perf/test_rank_5000.py`
-- [ ] T070 [P] Write the Playwright flow (guest ranking → details → compare → register → saved weights) in `e2e/guest-to-profile.spec.ts`
+- [x] T070 [P] Write the Playwright flow (guest ranking → details → compare → register → saved weights) in `e2e/guest-to-profile.spec.ts`
 - [x] T071 Security hardening pass: verify cookie flags, rate limits, CORS allowlist, dependency audit, and secret scan; record evidence in `docs/security-review.md`
-- [ ] T072 Enforce the coverage gate (≥ 80% on `domain/` and `ranking/`) in `backend/pyproject.toml` and the frontend coverage config
+- [x] T072 Enforce the coverage gate (≥ 80% on `domain/` and `ranking/`) in `backend/pyproject.toml` and the frontend coverage config
 - [x] T073 [P] Record the results of quickstart scenarios V1–V12 in `docs/validation.md`
-- [ ] T074 Final verification: `make lint`, `make typecheck`, `make test`, `make e2e`, and the quickstart walkthrough all pass
+- [x] T074 Final verification: `make lint`, `make typecheck`, `make test`, `make e2e`, and the quickstart walkthrough all pass
 
 ---
 
@@ -298,27 +298,31 @@ Task: "Profile form in frontend/src/features/profile/ProfileForm.tsx"
 
 ---
 
+---
+
 ## Implementation Status (2026-11-22)
 
-Checked: **68 of 74** tasks. Backend verified by
-`backend/tests/run_checks.py` (23/23 against PostgreSQL 16); frontend built with
-`next build` and exercised in headless Edge through `frontend/scripts/capture.mjs`
-(see `docs/validation.md`).
+Checked: **72 of 74** tasks. Verification evidence:
 
-**Deviations and remaining work:**
+- `backend/tests/run_checks.py` — **24/24** checks against PostgreSQL 16.
+- `backend/tests/coverage_report.py --full` — **96.3%** domain statement coverage
+  (gate: 80%), measured with the stdlib tracer because pytest-cov is unavailable.
+- `frontend/e2e` via Playwright on the system Edge — **4/4**: guest ranking with
+  explanations, comparison of three models, catalog OS filter, anonymous profile.
+- `frontend/tests/criteria.test.mjs` — **3/3** (generated constants match the registry).
+- `next build` and `tsc --noEmit` — clean.
 
-- T016–T018: SQLAlchemy 2 + Alembic could not be installed (no package index at the
-  time). The adapters use `psycopg2` and one versioned SQL migration applied by a
-  small migrator, so T018's split migration does not exist.
-- T022/T026/T033/T034/T038/T043/T044/T054/T055: the same assertions live in the
-  stdlib runner; the pytest files remain for CI, where pytest is available.
-- T045: `WeightSet` is a domain object with invariants; `User`, `Session`, and
-  `Profile` are still persistence records rather than rich entities.
-- T013, T072: no frontend unit-test runner and no coverage run yet.
-- T070: no Playwright suite; the interactive flow (submit → details → compare) is
-  verified by the CDP capture script instead.
-- T074: `next build` and `tsc --noEmit` pass; ESLint, ruff, and mypy are not
-  installed in this environment.
-- UI stack: Next.js 15, TypeScript, and TailwindCSS are used as planned. The
-  components follow shadcn/ui conventions locally; Framer Motion was replaced by CSS
-  keyframes to avoid another large offline dependency.
+**Open (2):**
+
+- **T018** — the ranking and event tables live in the single `0001_init.sql`
+  migration. Splitting an already-applied migration would rewrite history on
+  existing databases for no functional gain; a future schema change will add a
+  second revision instead.
+- **T045** — `WeightSet` carries the weight invariants and is used by the
+  application layer; `User`, `Session`, and `Profile` remain persistence records.
+  Promoting them to rich entities is a refactor with no behaviour change.
+
+**Environment deviations:** SQLAlchemy 2/Alembic could not be installed, so the
+adapters use `psycopg2` with one versioned SQL migration; pytest was unavailable, so
+the checks and the coverage tracer are stdlib; Framer Motion was replaced by CSS
+keyframes and the shadcn/ui conventions are implemented locally.

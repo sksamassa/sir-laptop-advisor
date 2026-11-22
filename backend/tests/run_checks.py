@@ -201,6 +201,13 @@ def _() -> None:
         raise AssertionError("invalid weights must be rejected")
 
 
+@check("domain validation and error branches")
+def _() -> None:
+    from edge_cases import run_edge_cases
+
+    run_edge_cases()
+
+
 # ---------------------------------------------------------------------------- API
 
 

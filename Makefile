@@ -30,6 +30,15 @@ test:
 test-unit:
 	cd backend && $(PY) tests/run_checks.py --unit-only
 
+coverage:
+	cd backend && $(PY) tests/coverage_report.py --full
+
+e2e:
+	cd frontend && npm test
+
+criteria-test:
+	cd frontend && npm run test:criteria
+
 gen-criteria:
 	node shared/criteria.codegen.mjs
 

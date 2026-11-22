@@ -16,7 +16,9 @@ API contract, tasks).
 | Backend API: catalog, auth, profiles, rankings, replay, comparison, admin | Implemented |
 | PostgreSQL schema + versioned SQL migrations | Implemented (`backend/migrations`) |
 | In-process event bus with idempotent replay (`processed_events`) | Implemented |
-| Executable acceptance checks (23, incl. HTTP against PostgreSQL) | **Passing** (see `docs/validation.md`) |
+| Executable acceptance checks (24, incl. HTTP against PostgreSQL) | **Passing** (see `docs/validation.md`) |
+| Domain statement coverage | **96.3%** (gate 80%) via `make coverage` |
+| Browser tests | **4/4** Playwright scenarios on system Edge (`make e2e`) |
 | Performance: 5 000 models ranked in ~220 ms (p95 261 ms) | **Passing** (`backend/tests/perf/`) |
 | Next.js 15 frontend (US1–US4: ranking, details, compare, catalog, profile) | **Implemented** — `next build` passes; verified in headless Edge |
 | UI quality gates (tsc, ESLint) | `tsc --noEmit` passes; ESLint not installed offline |
@@ -54,8 +56,10 @@ Demo maintainer comes from `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`
 ## Verify
 
 ```bash
-make test        # 22 acceptance checks; needs a reachable PostgreSQL
+make test        # 24 acceptance checks; needs a reachable PostgreSQL
 make test-unit   # SIR kernel checks only; no database required
+make coverage    # domain statement coverage (stdlib tracer)
+make e2e         # Playwright against the running UI
 python backend/tests/perf/test_rank_5000.py   # performance budget check
 ```
 
