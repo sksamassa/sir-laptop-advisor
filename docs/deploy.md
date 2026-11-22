@@ -46,34 +46,53 @@ postgresql://USER:PASSWORD@HOST/DBNAME?sslmode=require
 The service applies its own versioned SQL migrations on start
 (`0001_init.sql`, `0002_catalog_provenance.sql`), so do not use ORM `create_all`.
 
-## 2. API on Render (Web Service, Docker)
+## 2. API on Render
 
-Point Render at this repository with **Root Directory `backend`**. The included
-`Dockerfile` builds `requirements.txt` and serves:
+**Fastest path — Blueprint:** push `render.yaml`, then in Render choose
+*New → Blueprint*, pick this repository, and apply. It creates the free PostgreSQL
+instance and the Docker web service with generated secrets; Render prompts once for
+`CORS_ORIGINS` (you can enter the Vercel URL later).
 
-```bash
-uvicorn laptop_dss.main:app --host 0.0.0.0 --port $PORT --app-dir /app/src
-```
+**Manual path:** *New → Web Service*, connect the repository, and set:
 
-Environment variables:
+| Field | Value |
+|---|---|
+| Root Directory | `backend` |
+| Runtime | Docker (detected from `backend/Dockerfile`) |
+| Instance Type | Free |
+| Health Check Path | `/api/v1/health` |
+
+Then *New → Postgres* (database `laptop_dss`, user `dss`), copy its **Internal Database
+URL**, and add the environment variables below to the web service.
 
 | Variable | Value |
 |---|---|
-| `DATABASE_URL` | the Neon/Supabase string above, with `sslmode=require` |
+| `DATABASE_URL` | Render's internal database URL, or a Neon string with `sslmode=require` |
 | `SESSION_SECRET` | 32+ random bytes (`python -c "import secrets;print(secrets.token_urlsafe(48))"`) |
 | `SESSION_COOKIE_NAME` | `sess` |
+| `APP_ENV` | `production` — this turns on the `Secure` cookie flag |
 | `CORS_ORIGINS` | `https://<your-app>.vercel.app` (only needed for direct API calls) |
-| `APP_ENV` | `production` — this is what turns on the `Secure` cookie flag |
 | `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | demo maintainer; set a real password |
 
-Seed once, from the Render shell:
+Seed once from the Render *Shell* tab:
 
 ```bash
 python -c "from laptop_dss.main import seed_demo; seed_demo()"
 ```
 
-Do not enable Render's autoscaling for this coursework build: session cleanup and the
-rate limiter are per-process.
+Migrations run automatically at startup (`0001_init.sql`, `0002_catalog_provenance.sql`);
+the logs show `applied migrations: …` on first boot.
+
+### Cold starts and the Vercel proxy
+
+Render's free web service sleeps after ~15 minutes idle. Waking it takes 30–50 seconds,
+which **exceeds Vercel's Hobby function timeout** (10 s) — so the first request through
+the `/api/*` rewrite can return a 504 while the second succeeds. For a demo, either:
+
+- ping `https://<api-host>/api/v1/health` every 10 minutes (a free cron/uptime monitor), or
+- upgrade the Render instance so it never sleeps.
+
+Do not enable autoscaling: session cleanup and the rate limiter are per-process.
 
 ## 3. Frontend on Vercel
 

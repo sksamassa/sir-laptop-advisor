@@ -1,0 +1,33 @@
+# Render Blueprint: API service + PostgreSQL, deployed from this repository.
+# Dashboard: New -> Blueprint -> pick this repo -> Apply.
+#
+# The frontend is deployed separately on Vercel and proxies /api/* here.
+# CORS_ORIGINS is prompted at creation time because the Vercel URL is not known
+# yet; it only matters for direct browser calls, since UI traffic is proxied.
+
+databases:
+  - name: laptop-dss-db
+    databaseName: laptop_dss
+    user: dss
+    plan: free
+
+services:
+  - type: web
+    name: sir-laptop-advisor-api
+    runtime: docker
+    rootDir: backend
+    plan: free
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: laptop-dss-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: SESSION_COOKIE_NAME
+        value: sess
+      - key: APP_ENV
+        value: production
+      - key: CORS_ORIGINS
+        sync: false
